@@ -1,0 +1,7 @@
+name: jwt-templates-go
+description: "Two JWT templates for access and id tokens (Go)"
+runtime: go
+config:
+  apiKey:
+    description: Clerk instance API key (secret key sk_...)
+    secret: true

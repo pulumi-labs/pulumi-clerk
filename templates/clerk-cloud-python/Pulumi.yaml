@@ -1,0 +1,24 @@
+name: ${PROJECT}
+description: ${DESCRIPTION}
+runtime: python
+template:
+  description: Scaffold a Clerk JWT template with Pulumi
+  config:
+    apiKey:
+      description: Clerk instance API key (secret key sk_...)
+      secret: true
+    templateName:
+      description: Name for the JWT template
+      default: access_token
+    claimsJson:
+      description: "JSON string of JWT claims"
+      default: "{}"
+config:
+  apiKey:
+    type: string
+  templateName:
+    type: string
+    default: access_token
+  claimsJson:
+    type: string
+    default: "{}"

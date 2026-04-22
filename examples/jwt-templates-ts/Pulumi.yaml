@@ -1,0 +1,7 @@
+name: jwt-templates-ts
+description: "Two JWT templates for access and id tokens (TypeScript)"
+runtime: nodejs
+config:
+  apiKey:
+    description: Clerk instance API key (secret key sk_...)
+    secret: true

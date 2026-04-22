@@ -1,0 +1,13 @@
+name: team-auth-python
+description: "Team authorization: org, roles, permissions, JWT templates, OAuth app (Python)"
+runtime: python
+config:
+  apiKey:
+    description: Clerk instance API key (secret key sk_...)
+    secret: true
+  orgName:
+    description: Display name for the organization
+    default: Acme Engineering
+  orgSlug:
+    description: URL-safe slug for the organization
+    default: acme-eng

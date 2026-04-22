@@ -1,0 +1,7 @@
+name: jwt-templates-python
+description: "Two JWT templates for access and id tokens (Python)"
+runtime: python
+config:
+  apiKey:
+    description: Clerk instance API key (secret key sk_...)
+    secret: true

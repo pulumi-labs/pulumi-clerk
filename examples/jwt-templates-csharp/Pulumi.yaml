@@ -1,0 +1,7 @@
+name: jwt-templates-csharp
+description: "Two JWT templates for access and id tokens (C#)"
+runtime: dotnet
+config:
+  apiKey:
+    description: Clerk instance API key (secret key sk_...)
+    secret: true

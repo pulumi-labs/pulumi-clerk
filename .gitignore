@@ -1,0 +1,4 @@
+# Generated build artifacts -- do not commit
+schema.json
+sdk/
+bin/

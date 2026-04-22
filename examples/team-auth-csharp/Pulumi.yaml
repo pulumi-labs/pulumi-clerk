@@ -1,0 +1,13 @@
+name: team-auth-csharp
+description: "Team authorization: org, roles, permissions, JWT templates, OAuth app (C#)"
+runtime: dotnet
+config:
+  apiKey:
+    description: Clerk instance API key (secret key sk_...)
+    secret: true
+  orgName:
+    description: Display name for the organization
+    default: Acme Engineering
+  orgSlug:
+    description: URL-safe slug for the organization
+    default: acme-eng
