@@ -19,7 +19,7 @@ require (
 require (
 	github.com/clerk/clerk-sdk-go/v2 v2.5.1 // indirect
 	github.com/fatih/color v1.16.0 // indirect
-	github.com/go-jose/go-jose/v3 v3.0.4 // indirect
+	github.com/go-jose/go-jose/v3 v3.0.5 // indirect
 	github.com/hashicorp/go-hclog v1.6.3 // indirect
 	github.com/hashicorp/terraform-plugin-go v0.29.0 // indirect
 	github.com/hashicorp/terraform-plugin-log v0.10.0 // indirect
