@@ -12,8 +12,6 @@ func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
 		cfg := config.New(ctx, "")
 
-		apiKey := cfg.RequireSecret("apiKey")
-
 		orgName := cfg.Get("orgName")
 		if orgName == "" {
 			orgName = "Acme Engineering"
@@ -23,20 +21,11 @@ func main() {
 			orgSlug = "acme-eng"
 		}
 
-		// Explicit provider so credentials come from project-namespace config,
-		// not environment variables.
-		prov, err := clerk.NewProvider(ctx, "clerk", &clerk.ProviderArgs{
-			ApiKey: apiKey,
-		})
-		if err != nil {
-			return err
-		}
-
 		// Organization -- top-level B2B tenant.
 		org, err := clerk.NewOrganization(ctx, "org", &clerk.OrganizationArgs{
 			Name: pulumi.String(orgName),
 			Slug: pulumi.String(orgSlug),
-		}, pulumi.Provider(prov))
+		})
 		if err != nil {
 			return err
 		}
@@ -46,7 +35,7 @@ func main() {
 			Key:         pulumi.String("org:repos:write"),
 			Name:        pulumi.String("Write to Repositories"),
 			Description: pulumi.String("Permission to push code and merge pull requests"),
-		}, pulumi.Provider(prov))
+		})
 		if err != nil {
 			return err
 		}
@@ -57,7 +46,7 @@ func main() {
 			Name:        pulumi.String("Senior Engineer"),
 			Description: pulumi.String("Senior engineers with merge and deploy access"),
 			Permissions: pulumi.StringArray{reposWritePermission.Key},
-		}, pulumi.Provider(prov))
+		})
 		if err != nil {
 			return err
 		}
@@ -76,7 +65,7 @@ func main() {
 			Name:     pulumi.String("org_aware"),
 			Claims:   pulumi.String(string(orgAwareClaims)),
 			Lifetime: pulumi.Int(3600),
-		}, pulumi.Provider(prov))
+		})
 		if err != nil {
 			return err
 		}
@@ -87,7 +76,7 @@ func main() {
 			RedirectUris: pulumi.StringArray{pulumi.String("https://ci.example.com/oauth/callback")},
 			Scopes:       pulumi.String("profile email"),
 			Public:       pulumi.Bool(false),
-		}, pulumi.Provider(prov))
+		})
 		if err != nil {
 			return err
 		}

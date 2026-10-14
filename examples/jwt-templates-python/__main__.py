@@ -2,13 +2,6 @@ import json
 import pulumi
 import pulumi_clerk as clerk
 
-config = pulumi.Config()
-api_key = config.require_secret("apiKey")
-
-# Explicit provider so credentials come from project-namespace config,
-# not environment variables.
-provider = clerk.Provider("clerk", api_key=api_key)
-
 # Access token template -- adds user identity claims to short-lived access tokens.
 access_token_template = clerk.JwtTemplate("access-token",
     name="access_token",
@@ -19,7 +12,6 @@ access_token_template = clerk.JwtTemplate("access-token",
     }),
     lifetime=3600,
     allowed_clock_skew=5,
-    opts=pulumi.ResourceOptions(provider=provider),
 )
 
 # ID token template -- adds richer profile claims for display purposes.
@@ -33,7 +25,6 @@ id_token_template = clerk.JwtTemplate("id-token",
         "picture": "{{user.image_url}}",
     }),
     lifetime=3600,
-    opts=pulumi.ResourceOptions(provider=provider),
 )
 
 pulumi.export("accessTokenTemplateId", access_token_template.id)

@@ -5,16 +5,6 @@ using System.Text.Json;
 
 return await Deployment.RunAsync(() =>
 {
-    var config = new global::Pulumi.Config();
-    var apiKey = config.RequireSecret("apiKey");
-
-    // Explicit provider so credentials come from project-namespace config,
-    // not environment variables.
-    var provider = new Clerk.Provider("clerk", new Clerk.ProviderArgs
-    {
-        ApiKey = apiKey,
-    });
-
     // Access token template -- adds user identity claims.
     var accessClaims = JsonSerializer.Serialize(new
     {
@@ -28,7 +18,7 @@ return await Deployment.RunAsync(() =>
         Claims = accessClaims,
         Lifetime = 3600,
         AllowedClockSkew = 5,
-    }, new CustomResourceOptions { Provider = provider });
+    });
 
     // ID token template -- adds richer profile claims for display purposes.
     var idClaims = JsonSerializer.Serialize(new
@@ -44,7 +34,7 @@ return await Deployment.RunAsync(() =>
         Name = "id_token",
         Claims = idClaims,
         Lifetime = 3600,
-    }, new CustomResourceOptions { Provider = provider });
+    });
 
     return new Dictionary<string, object?>
     {

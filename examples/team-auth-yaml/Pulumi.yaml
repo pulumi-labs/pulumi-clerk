@@ -1,10 +1,9 @@
+# Provider configuration: this example uses the default provider. Set clerk:apiKey (secret) with
+# `pulumi config set [--secret] <key> <value>`, or export CLERK_API_KEY.
 name: team-auth-yaml
 description: "Team authorization: org, roles, permissions, JWT templates, OAuth app (YAML)"
 runtime: yaml
 config:
-  apiKey:
-    description: Clerk instance API key (secret key sk_...)
-    secret: true
   orgName:
     description: Display name for the organization
     default: Acme Engineering
@@ -12,25 +11,17 @@ config:
     description: URL-safe slug for the organization
     default: acme-eng
 resources:
-  clerk-provider:
-    type: pulumi:providers:clerk
-    properties:
-      apiKey: ${apiKey}
   org:
     type: clerk:Organization
     properties:
       name: ${orgName}
       slug: ${orgSlug}
-    options:
-      provider: ${clerk-provider}
   repos-write:
     type: clerk:OrganizationPermission
     properties:
       key: org:repos:write
       name: Write to Repositories
       description: Permission to push code and merge pull requests
-    options:
-      provider: ${clerk-provider}
   senior-engineer:
     type: clerk:OrganizationRole
     properties:
@@ -39,16 +30,12 @@ resources:
       description: Senior engineers with merge and deploy access
       permissions:
         - ${repos-write.key}
-    options:
-      provider: ${clerk-provider}
   org-aware:
     type: clerk:JwtTemplate
     properties:
       name: org_aware
       claims: '{"user_id":"{{user.id}}","org_id":"{{org.id}}","org_slug":"{{org.slug}}","org_role":"{{org.role}}"}'
       lifetime: 3600
-    options:
-      provider: ${clerk-provider}
   cicd:
     type: clerk:OauthApplication
     properties:
@@ -57,8 +44,6 @@ resources:
         - https://ci.example.com/oauth/callback
       scopes: profile email
       public: false
-    options:
-      provider: ${clerk-provider}
 outputs:
   orgId: ${org.id}
   seniorEngineerRoleKey: ${senior-engineer.key}

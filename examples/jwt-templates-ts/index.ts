@@ -1,12 +1,4 @@
-import * as pulumi from "@pulumi/pulumi";
 import * as clerk from "@pulumi/clerk";
-
-const config = new pulumi.Config();
-const apiKey = config.requireSecret("apiKey");
-
-// Explicit provider so credentials come from project-namespace config,
-// not environment variables.
-const provider = new clerk.Provider("clerk", { apiKey });
 
 // Access token template -- adds user identity claims to short-lived access tokens.
 const accessTokenTemplate = new clerk.JwtTemplate("access-token", {
@@ -18,7 +10,7 @@ const accessTokenTemplate = new clerk.JwtTemplate("access-token", {
     }),
     lifetime: 3600,
     allowedClockSkew: 5,
-}, { provider });
+});
 
 // ID token template -- adds richer profile claims for display purposes.
 const idTokenTemplate = new clerk.JwtTemplate("id-token", {
@@ -31,7 +23,7 @@ const idTokenTemplate = new clerk.JwtTemplate("id-token", {
         "picture": "{{user.image_url}}",
     }),
     lifetime: 3600,
-}, { provider });
+});
 
 export const accessTokenTemplateId = accessTokenTemplate.id;
 export const idTokenTemplateId = idTokenTemplate.id;

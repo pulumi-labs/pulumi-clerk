@@ -1,10 +1,9 @@
+# Provider configuration: this example uses the default provider. Set clerk:apiKey (secret) with
+# `pulumi config set [--secret] <key> <value>`, or export CLERK_API_KEY.
 name: team-auth-go
 description: "Team authorization: org, roles, permissions, JWT templates, OAuth app (Go)"
 runtime: go
 config:
-  apiKey:
-    description: Clerk instance API key (secret key sk_...)
-    secret: true
   orgName:
     description: Display name for the organization
     default: Acme Engineering

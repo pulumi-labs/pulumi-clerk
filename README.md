@@ -46,15 +46,17 @@ This provider bridges the community
 
 ## Provider Configuration
 
-Configure the provider with your Clerk API credentials:
+Resources use the default provider, which reads `clerk:apiKey` from stack config or the
+`CLERK_API_KEY` environment variable. No explicit `Provider` resource is needed:
 
-```typescript
-import * as pulumi from "@pulumi/pulumi";
-
-// Set via environment variable CLERK_API_KEY, or via config:
-const config = new pulumi.Config();
-const apiKey = config.requireSecret("apiKey");
+```bash
+pulumi config set --secret clerk:apiKey <your-secret-key>
+# or: export CLERK_API_KEY=<your-secret-key>
+# Platform API (beta): pulumi config set --secret clerk:platformApiKey <key>  # or CLERK_PLATFORM_API_KEY
 ```
+
+An explicit `clerk.Provider` is still supported (for example to target several Clerk instances
+from one program), but the default provider is preferred.
 
 ### Environment Variables
 
@@ -68,11 +70,7 @@ const apiKey = config.requireSecret("apiKey");
 ### TypeScript -- JWT Template
 
 ```typescript
-import * as pulumi from "@pulumi/pulumi";
 import * as clerk from "@pulumi/clerk";
-
-const config = new pulumi.Config();
-const apiKey = config.requireSecret("apiKey");
 
 const template = new clerk.JwtTemplate("access-token", {
     name: "access_token",
@@ -90,9 +88,6 @@ export const templateId = template.id;
 ```python
 import pulumi
 import pulumi_clerk as clerk
-
-config = pulumi.Config()
-api_key = config.require_secret("apiKey")
 
 org = clerk.Organization("acme",
     name="Acme Engineering",

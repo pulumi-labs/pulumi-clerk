@@ -1,15 +1,9 @@
+# Provider configuration: this example uses the default provider. Set clerk:apiKey (secret) with
+# `pulumi config set [--secret] <key> <value>`, or export CLERK_API_KEY.
 name: jwt-templates-yaml
 description: "Two JWT templates for access and id tokens (YAML)"
 runtime: yaml
-config:
-  apiKey:
-    description: Clerk instance API key (secret key sk_...)
-    secret: true
 resources:
-  clerk-provider:
-    type: pulumi:providers:clerk
-    properties:
-      apiKey: ${apiKey}
   access-token:
     type: clerk:JwtTemplate
     properties:
@@ -17,16 +11,12 @@ resources:
       claims: '{"user_id":"{{user.id}}","email":"{{user.primary_email_address}}","full_name":"{{user.full_name}}"}'
       lifetime: 3600
       allowedClockSkew: 5
-    options:
-      provider: ${clerk-provider}
   id-token:
     type: clerk:JwtTemplate
     properties:
       name: id_token
       claims: '{"sub":"{{user.id}}","email":"{{user.primary_email_address}}","given_name":"{{user.first_name}}","family_name":"{{user.last_name}}","picture":"{{user.image_url}}"}'
       lifetime: 3600
-    options:
-      provider: ${clerk-provider}
 outputs:
   accessTokenTemplateId: ${access-token.id}
   idTokenTemplateId: ${id-token.id}

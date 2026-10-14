@@ -5,9 +5,6 @@ import com.pulumi.Context;
 import com.pulumi.Pulumi;
 import com.pulumi.clerk.JwtTemplate;
 import com.pulumi.clerk.JwtTemplateArgs;
-import com.pulumi.clerk.Provider;
-import com.pulumi.clerk.ProviderArgs;
-import com.pulumi.resources.CustomResourceOptions;
 import java.util.Map;
 
 public class App {
@@ -17,14 +14,6 @@ public class App {
 
     public static void stack(Context ctx) {
         var mapper = new ObjectMapper();
-        var config = ctx.config();
-        var apiKey = config.requireSecret("apiKey");
-
-        // Explicit provider so credentials come from project-namespace config,
-        // not environment variables.
-        var provider = new Provider("clerk", ProviderArgs.builder()
-            .apiKey(apiKey)
-            .build());
 
         String accessClaims;
         String idClaims;
@@ -51,20 +40,14 @@ public class App {
             .claims(accessClaims)
             .lifetime(3600)
             .allowedClockSkew(5)
-            .build(),
-            CustomResourceOptions.builder()
-                .provider(provider)
-                .build());
+            .build());
 
         // ID token template -- adds richer profile claims for display purposes.
         var idTokenTemplate = new JwtTemplate("id-token", JwtTemplateArgs.builder()
             .name("id_token")
             .claims(idClaims)
             .lifetime(3600)
-            .build(),
-            CustomResourceOptions.builder()
-                .provider(provider)
-                .build());
+            .build());
 
         ctx.export("accessTokenTemplateId", accessTokenTemplate.id());
         ctx.export("idTokenTemplateId", idTokenTemplate.id());

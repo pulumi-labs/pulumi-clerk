@@ -6,23 +6,15 @@ using System.Text.Json;
 return await Deployment.RunAsync(() =>
 {
     var config = new global::Pulumi.Config();
-    var apiKey = config.RequireSecret("apiKey");
     var orgName = config.Get("orgName") ?? "Acme Engineering";
     var orgSlug = config.Get("orgSlug") ?? "acme-eng";
-
-    // Explicit provider so credentials come from project-namespace config,
-    // not environment variables.
-    var provider = new Clerk.Provider("clerk", new Clerk.ProviderArgs
-    {
-        ApiKey = apiKey,
-    });
 
     // Organization -- top-level B2B tenant.
     var org = new Clerk.Organization("org", new Clerk.OrganizationArgs
     {
         Name = orgName,
         Slug = orgSlug,
-    }, new CustomResourceOptions { Provider = provider });
+    });
 
     // Custom permission: write access to repositories.
     var reposWritePermission = new Clerk.OrganizationPermission("repos-write",
@@ -31,7 +23,7 @@ return await Deployment.RunAsync(() =>
             Key = "org:repos:write",
             Name = "Write to Repositories",
             Description = "Permission to push code and merge pull requests",
-        }, new CustomResourceOptions { Provider = provider });
+        });
 
     // Senior engineer role -- can merge and deploy.
     var seniorEngineerRole = new Clerk.OrganizationRole("senior-engineer",
@@ -41,7 +33,7 @@ return await Deployment.RunAsync(() =>
             Name = "Senior Engineer",
             Description = "Senior engineers with merge and deploy access",
             Permissions = new[] { reposWritePermission.Key },
-        }, new CustomResourceOptions { Provider = provider });
+        });
 
     // Org-aware JWT template -- embeds org context in tokens.
     var orgAwareClaims = JsonSerializer.Serialize(new
@@ -56,7 +48,7 @@ return await Deployment.RunAsync(() =>
         Name = "org_aware",
         Claims = orgAwareClaims,
         Lifetime = 3600,
-    }, new CustomResourceOptions { Provider = provider });
+    });
 
     // OAuth application for CI/CD pipeline integration.
     var cicdApp = new Clerk.OauthApplication("cicd", new Clerk.OauthApplicationArgs
@@ -65,7 +57,7 @@ return await Deployment.RunAsync(() =>
         RedirectUris = new[] { "https://ci.example.com/oauth/callback" },
         Scopes = "profile email",
         Public = false,
-    }, new CustomResourceOptions { Provider = provider });
+    });
 
     return new Dictionary<string, object?>
     {
