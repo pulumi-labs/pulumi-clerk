@@ -4,8 +4,8 @@ runtime: yaml
 template:
   description: Scaffold a Clerk JWT template with Pulumi
   config:
-    apiKey:
-      description: Clerk instance API key (secret key sk_...)
+    clerk:apiKey:
+      description: Clerk instance API key (secret key sk_...) or set CLERK_API_KEY.
       secret: true
     templateName:
       description: Name for the JWT template
@@ -14,8 +14,6 @@ template:
       description: "JSON string of JWT claims"
       default: "{}"
 config:
-  apiKey:
-    type: string
   templateName:
     type: string
     default: access_token
@@ -23,16 +21,11 @@ config:
     type: string
     default: "{}"
 resources:
-  clerk-provider:
-    type: pulumi:providers:clerk
-    properties:
-      apiKey: ${apiKey}
+  # The default provider reads the key from `clerk:apiKey` or CLERK_API_KEY.
   jwt-template:
     type: clerk:JwtTemplate
     properties:
       name: ${templateName}
       claims: ${claimsJson}
-    options:
-      provider: ${clerk-provider}
 outputs:
   templateId: ${jwt-template.id}

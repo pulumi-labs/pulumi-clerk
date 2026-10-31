@@ -4,6 +4,10 @@ All notable changes to the Clerk Pulumi provider are documented here.
 
 ## [Unreleased]
 
+### Changed
+
+- Templates use the default provider; credentials are declared as clerk:apiKey in template config (#1183).
+
 ### Added
 
 Provider resources (all bridged from buildwithdeck/terraform-provider-clerk v0.6.1):

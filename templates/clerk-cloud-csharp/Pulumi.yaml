@@ -4,8 +4,8 @@ runtime: dotnet
 template:
   description: Scaffold a Clerk JWT template with Pulumi
   config:
-    apiKey:
-      description: Clerk instance API key (secret key sk_...)
+    clerk:apiKey:
+      description: Clerk instance API key (secret key sk_...) or set CLERK_API_KEY.
       secret: true
     templateName:
       description: Name for the JWT template
@@ -14,8 +14,6 @@ template:
       description: "JSON string of JWT claims"
       default: "{}"
 config:
-  apiKey:
-    type: string
   templateName:
     type: string
     default: access_token
