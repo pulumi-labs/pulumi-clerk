@@ -1,21 +1,40 @@
-// Command pulumi-resource-clerk is the provider resource server binary.
-// It is invoked by the Pulumi CLI at runtime to serve resource CRUD operations.
+// Copyright 2026, Pulumi Corporation.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Command pulumi-resource-clerk is the entry point for the Modal Pulumi
+// provider binary. It is invoked by the Pulumi engine and serves the
+// provider gRPC protocol over stdin/stdout.
 package main
 
 import (
 	"context"
+	"os"
 
-	clerk "github.com/pulumi/pulumi-clerk/provider"
-	pf "github.com/pulumi/pulumi-terraform-bridge/v3/pkg/pf/tfbridge"
+	pgp "github.com/pulumi/pulumi-go-provider"
+
+	"github.com/pulumi/autoregistry/lib/providers/clerk/provider/pkg/provider"
+	"github.com/pulumi/autoregistry/lib/providers/clerk/provider/pkg/version"
 )
 
-// PackageSchema is the Pulumi package schema produced by `make generate_schema`.
-// This placeholder is replaced by the real schema bytes during the build; it must be
-// non-nil so the bridge runtime assertion (exactly one of PackageSchema/XGetSchema must
-// be set) is satisfied in pre-tfgen scaffolds.
-var PackageSchema = []byte("{}")
-
 func main() {
-	meta := pf.ProviderMetadata{PackageSchema: PackageSchema}
-	pf.Main(context.Background(), "clerk", clerk.Provider(), meta)
+	p, err := provider.New()
+	if err != nil {
+		_, _ = os.Stderr.WriteString("failed to construct provider: " + err.Error() + "\n")
+		os.Exit(1)
+	}
+	if err := pgp.RunProvider(context.Background(), "clerk", version.Version, p); err != nil {
+		_, _ = os.Stderr.WriteString(err.Error() + "\n")
+		os.Exit(1)
+	}
 }

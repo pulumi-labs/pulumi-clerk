@@ -54,7 +54,7 @@ return await Deployment.RunAsync(() =>
     var cicdApp = new Clerk.OauthApplication("cicd", new Clerk.OauthApplicationArgs
     {
         Name = "CI/CD Integration",
-        RedirectUris = new[] { "https://ci.example.com/oauth/callback" },
+        CallbackUrl = "https://ci.example.com/oauth/callback",
         Scopes = "profile email",
         Public = false,
     });

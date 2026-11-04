@@ -41,7 +41,7 @@ const orgAwareTemplate = new clerk.JwtTemplate("org-aware", {
 // OAuth application for CI/CD pipeline integration.
 const cicdApp = new clerk.OauthApplication("cicd", {
     name: "CI/CD Integration",
-    redirectUris: ["https://ci.example.com/oauth/callback"],
+    callbackUrl: "https://ci.example.com/oauth/callback",
     scopes: "profile email",
     public: false,
 });

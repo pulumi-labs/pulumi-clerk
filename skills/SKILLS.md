@@ -2,142 +2,41 @@
 
 ## Overview
 
-This provider bridges the community
-[buildwithdeck/terraform-provider-clerk](https://github.com/buildwithdeck/terraform-provider-clerk)
-v0.6.1 via the Pulumi Terraform Bridge (TPF / terraform-plugin-framework path).
+A native `pulumi-go-provider` (infer) provider. It calls the Clerk Backend API and the Platform API (beta) over plain JSON/HTTP
+through one small client (`provider/pkg/provider/client.go`). It replaced the provider bridged from
+`buildwithdeck/terraform-provider-clerk` v0.6.1 (#1413). The Clerk Go SDK is deliberately not a dependency: the Platform API has
+no SDK, and the tests need one HTTP fake for both APIs.
 
-**Bridge path**: TPF (terraform-plugin-framework v1.17.0), NOT SDKv2.
-Use `pf.ShimProvider(...)` in resources.go, not `shimv2.NewProvider(...)`.
+## Layout
 
-## Key Technical Facts
+- `provider/pkg/provider/provider.go` -- config (`apiKey`, `platformApiKey`, `apiUrl`), `backendClient`/`platformClient`, and the
+  explicit registration of every `infer.Resource[...]` and `infer.Function[...]` (the repo's native-provider-standard checker needs the
+  literal instantiations).
+- One file per resource (`jwt_template.go`) with its Args, State, CRUD and its `Get<Name>` lookup function, and one `_test.go` beside it.
+- `fake_clerk_test.go` -- in-memory fake of the API (`fakeCollection` for plain REST collections, bespoke handlers for the rest).
+  Resource tests register routes from `init()` into `fakeRegistrars`.
 
-### Upstream Provider
+## Rules every resource follows
 
-- **Module**: `github.com/buildwithdeck/terraform-provider-clerk`
-- **Tag**: `v0.6.1` (2026-04-06) -- pinned; see Schema Churn section below
-- **Entry point**: `internal/provider.New(version string) func() provider.Provider`
-- **TF registry**: `registry.terraform.io/buildwithdeck/clerk`
-- **Upstream SDK**: `github.com/clerk/clerk-sdk-go/v2 v2.5.1`
+1. Create, Read, Update (or `replaceOnChanges` on every input the API cannot update) and Delete. Read works from the ID alone, so import works, and sets both Inputs and State.
+2. When Clerk fills in a default for an optional input, the input stays unset in state and the server value goes into a separate
+   output (`effective*` or `current*`). Putting the server value into the input makes the default diff report a change.
+3. JSON-valued inputs (claims, metadata, instance config) compare canonically.
+4. No input named `version` (pulumi-go-provider#704).
+5. Function arguments and results cannot have a top-level field named `id` (reserved by the schema generator): lookup functions use `<resource>Id`.
+6. `provider:"secret"` marks secret inputs at runtime only; secret outputs need the schema's secret flag (`WireDependencies(...AlwaysSecret())` for nested ones). Tests assert secrecy against the schema.
+7. A failure after an object exists returns `infer.ResourceInitFailedError` with the ID and partial state.
 
-### Token Scheme
+## Authentication
 
-Single module strategy: `tokens.SingleModule("clerk_", "index", tokens.MakeStandard("clerk"))`
-
-All 20 resources and 1 data source are explicitly declared in resources.go as a safety
-net against automatic token computation producing wrong names.
-
-### Authentication
-
-Two API key scopes:
-
-| Config key | Env var | Scope |
+| Config | Env | Scope |
 |---|---|---|
-| `api_key` | `CLERK_API_KEY` | Instance API -- most resources |
-| `platform_api_key` | `CLERK_PLATFORM_API_KEY` | Platform API beta -- Application, Domain, InstanceConfig, InstanceDomain |
+| `apiKey` | `CLERK_API_KEY`, then `CLERK_SECRET_KEY` | Backend API: everything except the Platform resources |
+| `platformApiKey` | `CLERK_PLATFORM_API_KEY` | Platform API beta: Application, Domain, InstanceConfig |
 
-Most users only need `CLERK_API_KEY`. Platform API is in beta and requires a separate
-key. Document this clearly in examples and README.
+A missing key fails with an error naming the config key and the environment variable.
 
-## Resources by API Scope
+## Upgrading against the API
 
-### Instance API (standard, `CLERK_API_KEY`)
-
-These work for any Clerk instance with a regular secret key:
-
-- AllowlistIdentifier, BlocklistIdentifier
-- ApiKey, Machine
-- ApplicationSettings
-- JwtTemplate
-- OauthApplication
-- Organization, OrganizationDomain, OrganizationMembership
-- OrganizationPermission, OrganizationRole, RoleSet
-- RedirectUrl
-- SamlConnection
-- SvixWebhook
-
-### Platform API beta (`CLERK_PLATFORM_API_KEY`)
-
-These require Platform API beta access:
-
-- Application
-- Domain
-- InstanceConfig
-- InstanceDomain
-- getApplication (data source)
-
-**Example guideline**: Do NOT use Platform API resources in general-purpose examples.
-Stick to Instance API resources so examples work for any Clerk user.
-
-## Build Notes
-
-### Required go.mod Replace Directive
-
-The main provider go.mod MUST include:
-
-```
-replace github.com/hashicorp/terraform-plugin-sdk/v2 => github.com/pulumi/terraform-plugin-sdk/v2 v2.0.0-20260318212141-5525259d096b
-```
-
-This is required because pulumi-terraform-bridge uses a fork of terraform-plugin-sdk/v2
-that adds CloseEphemeralResource support. The replace directive from the bridge's own
-go.mod is not automatically inherited, so we mirror it explicitly.
-
-Without this, `go build` fails with:
-```
-cannot use (*GRPCProviderServer)(nil) as tfprotov5.ProviderServer value:
-*GRPCProviderServer does not implement tfprotov5.ProviderServer (missing method GenerateResourceConfig)
-```
-
-### Shim Module
-
-Located at `provider/shim/`. Module name:
-`github.com/buildwithdeck/terraform-provider-clerk/pulumi-bridge-shim`
-
-The shim imports `github.com/buildwithdeck/terraform-provider-clerk/internal/provider`
-directly. The `internal/` package is accessible because the shim module is declared as
-a sub-path of the upstream module path.
-
-### Build Commands
-
-```bash
-# Tidy dependencies
-make tidy
-
-# Build provider and tfgen binaries
-make build
-
-# Run tests (8 tests, all must pass)
-make test
-
-# Generate schema (requires pulumictl + pulumi CLI)
-make generate_schema
-```
-
-## Schema Churn Warning
-
-The upstream `buildwithdeck/terraform-provider-clerk` is **pre-1.0**. Breaking changes
-between versions are expected. When upgrading from v0.6.1:
-
-1. Bump the version in `provider/shim/go.mod`
-2. Run `make tidy`
-3. Verify the resource count in `resources_test.go` still matches
-4. If resources were added/removed, update the explicit map in `resources.go`
-5. Re-run `make test` and `make generate_schema`
-
-## Common Pitfalls
-
-1. **Using SDKv2 bridge path**: This provider uses TPF. Never use `shimv2.NewProvider()`
-   here; always use `pf.ShimProvider(shim.NewProvider())`.
-
-2. **Forgetting the tf-plugin-sdk replace directive**: See Build Notes above. Without it,
-   the provider compiles against the wrong version of tf-plugin-sdk and panics.
-
-3. **Phantom resources**: Do not add resources not present in upstream v0.6.1. The test
-   file explicitly checks for 20 resources and 1 data source. Run `make test` to verify.
-
-4. **Platform API resources in general examples**: The team-auth examples deliberately
-   avoid Platform API resources. Keep it that way -- not all users have Platform API access.
-
-5. **JSON claims in JwtTemplate**: The `claims` field is a JSON string, not an object.
-   In TypeScript use `JSON.stringify({...})`, in Python use `json.dumps({...})`, in Java
-   use `ObjectMapper` to serialize a Map, and in Go use `json.Marshal(map[string]string{...})`.
+Re-check `research/coverage/clerk.md` against the latest `clerk/clerk-sdk-go` release and the `bapi` and `platform` specs in
+`clerk/openapi-specs` whenever the upkeep run flags it.

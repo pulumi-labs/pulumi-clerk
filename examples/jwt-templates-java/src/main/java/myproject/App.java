@@ -1,11 +1,9 @@
 package myproject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pulumi.Context;
 import com.pulumi.Pulumi;
 import com.pulumi.clerk.JwtTemplate;
 import com.pulumi.clerk.JwtTemplateArgs;
-import java.util.Map;
 
 public class App {
     public static void main(String[] args) {
@@ -13,26 +11,16 @@ public class App {
     }
 
     public static void stack(Context ctx) {
-        var mapper = new ObjectMapper();
-
-        String accessClaims;
-        String idClaims;
-        try {
-            accessClaims = mapper.writeValueAsString(Map.of(
-                "user_id", "{{user.id}}",
-                "email", "{{user.primary_email_address}}",
-                "full_name", "{{user.full_name}}"
-            ));
-            idClaims = mapper.writeValueAsString(Map.of(
-                "sub", "{{user.id}}",
-                "email", "{{user.primary_email_address}}",
-                "given_name", "{{user.first_name}}",
-                "family_name", "{{user.last_name}}",
-                "picture", "{{user.image_url}}"
-            ));
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to serialize JWT claims", e);
-        }
+        var accessClaims = json(
+            "user_id", "{{user.id}}",
+            "email", "{{user.primary_email_address}}",
+            "full_name", "{{user.full_name}}");
+        var idClaims = json(
+            "sub", "{{user.id}}",
+            "email", "{{user.primary_email_address}}",
+            "given_name", "{{user.first_name}}",
+            "family_name", "{{user.last_name}}",
+            "picture", "{{user.image_url}}");
 
         // Access token template -- adds user identity claims to short-lived access tokens.
         var accessTokenTemplate = new JwtTemplate("access-token", JwtTemplateArgs.builder()
@@ -51,5 +39,17 @@ public class App {
 
         ctx.export("accessTokenTemplateId", accessTokenTemplate.id());
         ctx.export("idTokenTemplateId", idTokenTemplate.id());
+    }
+
+    // Builds a flat JSON object from alternating keys and values (all strings).
+    private static String json(String... pairs) {
+        var sb = new StringBuilder("{");
+        for (int i = 0; i < pairs.length; i += 2) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append('"').append(pairs[i]).append("\":\"").append(pairs[i + 1]).append('"');
+        }
+        return sb.append("}").toString();
     }
 }

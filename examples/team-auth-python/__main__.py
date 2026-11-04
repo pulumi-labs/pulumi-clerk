@@ -42,7 +42,7 @@ org_aware_template = clerk.JwtTemplate("org-aware",
 # OAuth application for CI/CD pipeline integration.
 cicd_app = clerk.OauthApplication("cicd",
     name="CI/CD Integration",
-    redirect_uris=["https://ci.example.com/oauth/callback"],
+    callback_url="https://ci.example.com/oauth/callback",
     scopes="profile email",
     public=False,
 )

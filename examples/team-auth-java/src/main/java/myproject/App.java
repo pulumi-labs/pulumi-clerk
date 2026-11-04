@@ -1,6 +1,5 @@
 package myproject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pulumi.Context;
 import com.pulumi.Pulumi;
 import com.pulumi.clerk.JwtTemplate;
@@ -14,7 +13,6 @@ import com.pulumi.clerk.OrganizationPermissionArgs;
 import com.pulumi.clerk.OrganizationRole;
 import com.pulumi.clerk.OrganizationRoleArgs;
 import java.util.List;
-import java.util.Map;
 
 public class App {
     public static void main(String[] args) {
@@ -50,17 +48,11 @@ public class App {
                 .build());
 
         // Org-aware JWT template -- embeds org context in tokens.
-        String orgAwareClaims;
-        try {
-            orgAwareClaims = new ObjectMapper().writeValueAsString(Map.of(
-                "user_id", "{{user.id}}",
-                "org_id", "{{org.id}}",
-                "org_slug", "{{org.slug}}",
-                "org_role", "{{org.role}}"
-            ));
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to serialize JWT claims", e);
-        }
+        var orgAwareClaims = json(
+            "user_id", "{{user.id}}",
+            "org_id", "{{org.id}}",
+            "org_slug", "{{org.slug}}",
+            "org_role", "{{org.role}}");
         var orgAwareTemplate = new JwtTemplate("org-aware", JwtTemplateArgs.builder()
             .name("org_aware")
             .claims(orgAwareClaims)
@@ -70,7 +62,7 @@ public class App {
         // OAuth application for CI/CD pipeline integration.
         var cicdApp = new OauthApplication("cicd", OauthApplicationArgs.builder()
             .name("CI/CD Integration")
-            .redirectUris(List.of("https://ci.example.com/oauth/callback"))
+            .callbackUrl("https://ci.example.com/oauth/callback")
             .scopes("profile email")
             .public_(false)
             .build());
@@ -79,5 +71,17 @@ public class App {
         ctx.export("seniorEngineerRoleKey", seniorEngineerRole.key());
         ctx.export("orgAwareTemplateId", orgAwareTemplate.id());
         ctx.export("cicdAppId", cicdApp.id());
+    }
+
+    // Builds a flat JSON object from alternating keys and values (all strings).
+    private static String json(String... pairs) {
+        var sb = new StringBuilder("{");
+        for (int i = 0; i < pairs.length; i += 2) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append('"').append(pairs[i]).append("\":\"").append(pairs[i + 1]).append('"');
+        }
+        return sb.append("}").toString();
     }
 }

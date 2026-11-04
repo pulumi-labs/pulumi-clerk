@@ -1,46 +1,59 @@
 MAKEFLAGS := -j2
-SHELL := /bin/bash
+SHELL     := /bin/bash
 
-PACK             := clerk
-PACKDIR          := sdk
-PROJECT          := github.com/pulumi/pulumi-clerk
-NODE_MODULE_NAME := @pulumi/clerk
-TF_NAME          := clerk
-PROVIDER_PATH    := provider
-PROVIDER_VERSION ?= $(shell pulumictl get version --language generic 2>/dev/null || echo "0.0.1-alpha.0")
+PROVIDER     := clerk
+BINARY       := pulumi-resource-$(PROVIDER)
+VERSION      ?= $(shell cat version.txt)
+PLUGIN_DIR   := $(HOME)/.pulumi/plugins/resource-$(PROVIDER)-v$(VERSION)
+PROVIDER_DIR := provider
+VERSION_PKG  := github.com/pulumi/autoregistry/lib/providers/clerk/provider/pkg/version
 
 TESTPARALLELISM := 4
 WORKING_DIR     := $(shell pwd)
+GO              ?= $(HOME)/go-toolchain-1.25/go/bin/go
 
-generate: generate_schema generate_sdks
+.PHONY: all tidy build install gen-sdk test lint clean fmt
 
-generate_schema:
-	cd $(PROVIDER_PATH) && go run ./cmd/pulumi-tfgen-$(PACK) --out ../schema.json
+all: build
 
-generate_sdks: generate_schema
-	pulumi package gen-sdk --language nodejs --out $(PACKDIR)/nodejs schema.json
-	pulumi package gen-sdk --language python --out $(PACKDIR)/python schema.json
-	pulumi package gen-sdk --language go --out $(PACKDIR)/go schema.json
-	pulumi package gen-sdk --language dotnet --out $(PACKDIR)/dotnet schema.json
-	pulumi package gen-sdk --language java --out $(PACKDIR)/java schema.json
-
-build:: build_provider build_tfgen
-
-build_provider:
-	cd $(PROVIDER_PATH) && go build -o $(WORKING_DIR)/bin/pulumi-resource-$(PACK) ./cmd/pulumi-resource-$(PACK)
-
-build_tfgen:
-	cd $(PROVIDER_PATH) && go build -o $(WORKING_DIR)/bin/pulumi-tfgen-$(PACK) ./cmd/pulumi-tfgen-$(PACK)
-
-install_provider: build_provider
-	mkdir -p $$HOME/.pulumi/plugins/resource-$(PACK)-$(PROVIDER_VERSION)
-	cp $(WORKING_DIR)/bin/pulumi-resource-$(PACK) $$HOME/.pulumi/plugins/resource-$(PACK)-$(PROVIDER_VERSION)/pulumi-resource-$(PACK)
-
+## (go.mod lives at the provider root, next to this Makefile; sources stay in provider/)
+## tidy: resolve Go modules (run first on a fresh checkout)
 tidy:
-	cd $(PROVIDER_PATH)/shim && go mod tidy
-	cd $(PROVIDER_PATH) && go mod tidy
+	$(GO) mod tidy
 
+## build: compile the provider binary into ./bin/
+build:
+	mkdir -p bin
+	$(GO) build \
+		-ldflags "-X $(VERSION_PKG).Version=$(VERSION)" \
+		-o bin/$(BINARY) \
+		./$(PROVIDER_DIR)/cmd/pulumi-resource-$(PROVIDER)
+
+## install: install the binary into the Pulumi plugin directory
+install: build
+	mkdir -p $(PLUGIN_DIR)
+	cp bin/$(BINARY) $(PLUGIN_DIR)/$(BINARY)
+
+## gen-sdk: generate language SDKs from the compiled provider schema
+gen-sdk: install
+	pulumi package gen-sdk $(PLUGIN_DIR)/$(BINARY) --language typescript --out sdk/nodejs
+	pulumi package gen-sdk $(PLUGIN_DIR)/$(BINARY) --language python    --out sdk/python
+	pulumi package gen-sdk $(PLUGIN_DIR)/$(BINARY) --language go        --out sdk/go
+	pulumi package gen-sdk $(PLUGIN_DIR)/$(BINARY) --language dotnet    --out sdk/dotnet
+	pulumi package gen-sdk $(PLUGIN_DIR)/$(BINARY) --language java      --out sdk/java
+
+## test: run Go unit tests
 test:
-	cd $(PROVIDER_PATH) && go test ./... -v -count=1 -timeout 2h -parallel $(TESTPARALLELISM)
+	$(GO) test ./... -v -count=1 -timeout 10m -parallel $(TESTPARALLELISM)
 
-.PHONY: generate generate_schema generate_sdks build build_provider build_tfgen install_provider tidy test
+## fmt: format Go source files
+fmt:
+	find $(PROVIDER_DIR) -name "*.go" | xargs gofmt -w
+
+## lint: vet Go source files
+lint:
+	$(GO) vet ./...
+
+## clean: remove build artifacts
+clean:
+	rm -rf bin/ sdk/

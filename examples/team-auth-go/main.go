@@ -72,10 +72,10 @@ func main() {
 
 		// OAuth application for CI/CD pipeline integration.
 		cicdApp, err := clerk.NewOauthApplication(ctx, "cicd", &clerk.OauthApplicationArgs{
-			Name:         pulumi.String("CI/CD Integration"),
-			RedirectUris: pulumi.StringArray{pulumi.String("https://ci.example.com/oauth/callback")},
-			Scopes:       pulumi.String("profile email"),
-			Public:       pulumi.Bool(false),
+			Name:        pulumi.String("CI/CD Integration"),
+			CallbackUrl: pulumi.String("https://ci.example.com/oauth/callback"),
+			Scopes:      pulumi.String("profile email"),
+			Public:      pulumi.Bool(false),
 		})
 		if err != nil {
 			return err
