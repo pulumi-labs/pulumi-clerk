@@ -1,5 +1,8 @@
 # Clerk Pulumi Provider
 
+> [!NOTE]
+> **Experimental.** This provider is experimental, versions are `0.x`, and its API may change without notice.
+
 A Pulumi provider for [Clerk](https://clerk.com), the authentication and user management platform for modern web
 applications. Provision Clerk configuration (allowlists, JWT templates, organizations, roles, SSO and more) as infrastructure
 code in your favorite language.
@@ -79,7 +82,7 @@ importing an object that was created elsewhere; Machine and ApiKey secrets can b
 ### TypeScript -- JWT Template
 
 ```typescript
-import * as clerk from "@pulumi/clerk";
+import * as clerk from "@pulumi-labs/clerk";
 
 const template = new clerk.JwtTemplate("access-token", {
     name: "access_token",
@@ -96,7 +99,7 @@ export const templateId = template.id;
 
 ```python
 import pulumi
-import pulumi_clerk as clerk
+import pulumi_labs_clerk as clerk
 
 org = clerk.Organization("acme",
     name="Acme Engineering",

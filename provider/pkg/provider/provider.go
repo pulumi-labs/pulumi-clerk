@@ -86,30 +86,30 @@ func lookupErr(kind, what string, err error) error {
 
 // New returns the configured Clerk Pulumi provider.
 func New() (pgp.Provider, error) {
-	const desc = "Manage Clerk (clerk.com) authentication infrastructure as code: allowlists, blocklists, JWT templates, organizations and their roles and permissions, OAuth applications, SAML connections, API keys, machines and webhooks."
+	const desc = "Experimental: manage Clerk (clerk.com) authentication infrastructure as code: allowlists, blocklists, JWT templates, organizations and their roles and permissions, OAuth applications, SAML connections, API keys, machines and webhooks."
 	return infer.NewProviderBuilder().
 		WithDisplayName("Clerk").
 		WithDescription(desc).
 		WithHomepage("https://clerk.com").
-		WithRepository("https://github.com/pulumi/autoregistry").
-		WithPublisher("Pulumi").
+		WithRepository("https://github.com/pulumi-labs/pulumi-clerk").
+		WithPublisher("Pulumi Labs").
 		WithLanguageMap(map[string]any{
 			"go": map[string]any{"generateResourceContainerTypes": true, "respectSchemaVersion": true},
 			"nodejs": map[string]any{
-				"packageName":          "@pulumi/clerk",
+				"packageName":          "@pulumi-labs/clerk",
 				"packageDescription":   desc,
 				"respectSchemaVersion": true,
 			},
 			"python": map[string]any{
-				"packageName":          "pulumi_clerk",
+				"packageName":          "pulumi_labs_clerk",
 				"respectSchemaVersion": true,
 				"pyproject":            map[string]any{"enabled": true},
 			},
-			"csharp": map[string]any{"rootNamespace": "Pulumi", "respectSchemaVersion": true},
-			"java":   map[string]any{"basePackage": "com.pulumi", "respectSchemaVersion": true},
+			"csharp": map[string]any{"rootNamespace": "Pulumi.Labs", "respectSchemaVersion": true},
+			"java":   map[string]any{"basePackage": "com.pulumi.labs", "respectSchemaVersion": true},
 		}).
-		WithGoImportPath("github.com/pulumi/pulumi-clerk/sdk/go/clerk").
-		WithPluginDownloadURL("github://api.github.com/pulumi/autoregistry").
+		WithGoImportPath("github.com/pulumi-labs/pulumi-clerk/sdk/go/clerk").
+		WithPluginDownloadURL("github://api.github.com/pulumi-labs/pulumi-clerk").
 		WithLicense("Apache-2.0").
 		WithKeywords("pulumi", "clerk", "auth", "authentication", "identity", "sso", "organizations", "category/infrastructure").
 		WithModuleMap(map[tokens.ModuleName]tokens.ModuleName{

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/pulumi/pulumi-clerk/sdk/go/clerk"
+	"github.com/pulumi-labs/pulumi-clerk/sdk/go/clerk"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 )

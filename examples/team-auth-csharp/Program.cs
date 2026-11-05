@@ -1,5 +1,5 @@
 using Pulumi;
-using Clerk = Pulumi.Clerk;
+using Clerk = Pulumi.Labs.Clerk;
 using System.Collections.Generic;
 using System.Text.Json;
 

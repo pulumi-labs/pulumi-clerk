@@ -1,6 +1,6 @@
 import json
 import pulumi
-import pulumi_clerk as clerk
+import pulumi_labs_clerk as clerk
 
 config = pulumi.Config()
 org_name = config.get("orgName") or "Acme Engineering"

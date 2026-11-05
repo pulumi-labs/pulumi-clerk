@@ -1,4 +1,4 @@
-import * as clerk from "@pulumi/clerk";
+import * as clerk from "@pulumi-labs/clerk";
 
 // Access token template -- adds user identity claims to short-lived access tokens.
 const accessTokenTemplate = new clerk.JwtTemplate("access-token", {

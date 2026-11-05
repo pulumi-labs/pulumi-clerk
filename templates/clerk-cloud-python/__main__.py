@@ -1,5 +1,5 @@
 import pulumi
-import pulumi_clerk as clerk
+import pulumi_labs_clerk as clerk
 
 config = pulumi.Config()
 template_name = config.get("templateName") or "access_token"

@@ -2,8 +2,8 @@ package myproject;
 
 import com.pulumi.Context;
 import com.pulumi.Pulumi;
-import com.pulumi.clerk.JwtTemplate;
-import com.pulumi.clerk.JwtTemplateArgs;
+import com.pulumi.labs.clerk.JwtTemplate;
+import com.pulumi.labs.clerk.JwtTemplateArgs;
 
 public class App {
     public static void main(String[] args) {

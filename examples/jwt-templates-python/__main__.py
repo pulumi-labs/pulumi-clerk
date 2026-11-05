@@ -1,6 +1,6 @@
 import json
 import pulumi
-import pulumi_clerk as clerk
+import pulumi_labs_clerk as clerk
 
 # Access token template -- adds user identity claims to short-lived access tokens.
 access_token_template = clerk.JwtTemplate("access-token",

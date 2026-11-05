@@ -2,16 +2,16 @@ package myproject;
 
 import com.pulumi.Context;
 import com.pulumi.Pulumi;
-import com.pulumi.clerk.JwtTemplate;
-import com.pulumi.clerk.JwtTemplateArgs;
-import com.pulumi.clerk.OauthApplication;
-import com.pulumi.clerk.OauthApplicationArgs;
-import com.pulumi.clerk.Organization;
-import com.pulumi.clerk.OrganizationArgs;
-import com.pulumi.clerk.OrganizationPermission;
-import com.pulumi.clerk.OrganizationPermissionArgs;
-import com.pulumi.clerk.OrganizationRole;
-import com.pulumi.clerk.OrganizationRoleArgs;
+import com.pulumi.labs.clerk.JwtTemplate;
+import com.pulumi.labs.clerk.JwtTemplateArgs;
+import com.pulumi.labs.clerk.OauthApplication;
+import com.pulumi.labs.clerk.OauthApplicationArgs;
+import com.pulumi.labs.clerk.Organization;
+import com.pulumi.labs.clerk.OrganizationArgs;
+import com.pulumi.labs.clerk.OrganizationPermission;
+import com.pulumi.labs.clerk.OrganizationPermissionArgs;
+import com.pulumi.labs.clerk.OrganizationRole;
+import com.pulumi.labs.clerk.OrganizationRoleArgs;
 import java.util.List;
 
 public class App {

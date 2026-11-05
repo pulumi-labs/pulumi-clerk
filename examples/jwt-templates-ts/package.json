@@ -2,7 +2,7 @@
   "name": "jwt-templates-ts",
   "version": "1.0.0",
   "dependencies": {
-    "@pulumi/clerk": "^0.1.0",
+    "@pulumi-labs/clerk": "^0.1.0",
     "@pulumi/pulumi": "^3.0.0"
   },
   "devDependencies": {

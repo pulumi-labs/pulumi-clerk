@@ -1,5 +1,5 @@
 import * as pulumi from "@pulumi/pulumi";
-import * as clerk from "@pulumi/clerk";
+import * as clerk from "@pulumi-labs/clerk";
 
 const config = new pulumi.Config();
 const orgName = config.get("orgName") ?? "Acme Engineering";
