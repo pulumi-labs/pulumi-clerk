@@ -4,6 +4,8 @@ All notable changes to the Clerk Pulumi provider are documented here.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-04
+
 ### Changed
 
 - The provider is now native (`pulumi-go-provider`) instead of bridged from `buildwithdeck/terraform-provider-clerk` v0.6.1 (#1413). It calls the Clerk Backend API and the Platform API (beta) directly. Package name, `clerk:index:<Resource>` tokens and the `clerk:apiKey` / `clerk:platformApiKey` config keys are unchanged.
