@@ -1,0 +1,39 @@
+{
+    "name": "@pulumi-labs/clerk",
+    "version": "0.0.1-dev",
+    "description": "Experimental: manage Clerk (clerk.com) authentication infrastructure as code: allowlists, blocklists, JWT templates, organizations and their roles and permissions, OAuth applications, SAML connections, API keys, machines and webhooks.",
+    "keywords": [
+        "pulumi",
+        "clerk",
+        "auth",
+        "authentication",
+        "identity",
+        "sso",
+        "organizations",
+        "category/infrastructure"
+    ],
+    "homepage": "https://clerk.com",
+    "repository": "https://github.com/pulumi-labs/pulumi-clerk",
+    "license": "Apache-2.0",
+    "scripts": {
+        "build": "tsc && cp package.json bin/"
+    },
+    "dependencies": {
+        "@pulumi/pulumi": "^3.142.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20",
+        "typescript": "^4.7.0"
+    },
+    "pulumi": {
+        "resource": true,
+        "name": "clerk",
+        "version": "0.0.1-dev",
+        "server": "github://api.github.com/pulumi-labs/pulumi-clerk"
+    },
+    "main": "bin/index.js",
+    "types": "bin/index.d.ts",
+    "files": [
+        "bin/"
+    ]
+}

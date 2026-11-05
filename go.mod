@@ -1,4 +1,4 @@
-module github.com/pulumi/autoregistry/lib/providers/clerk
+module github.com/pulumi-labs/pulumi-clerk
 
 go 1.26.0
 

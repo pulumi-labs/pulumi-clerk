@@ -1,0 +1,1 @@
+Experimental: manage Clerk (clerk.com) authentication infrastructure as code: allowlists, blocklists, JWT templates, organizations and their roles and permissions, OAuth applications, SAML connections, API keys, machines and webhooks.
