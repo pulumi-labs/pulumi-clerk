@@ -74,6 +74,8 @@ class SvixWebhook(pulumi.CustomResource):
             __props__ = SvixWebhookArgs.__new__(SvixWebhookArgs)
 
             __props__.__dict__["svix_url"] = None
+        secret_opts = pulumi.ResourceOptions(additional_secret_outputs=["svixUrl"])
+        opts = pulumi.ResourceOptions.merge(opts, secret_opts)
         super(SvixWebhook, __self__).__init__(
             'clerk:index:SvixWebhook',
             resource_name,

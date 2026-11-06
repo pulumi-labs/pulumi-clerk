@@ -44,7 +44,7 @@ public class App {
                 .key("org:senior-engineer")
                 .name("Senior Engineer")
                 .description("Senior engineers with merge and deploy access")
-                .permissions(reposWritePermission.key().applyValue(List::of))
+                .permissions(reposWritePermission.id().applyValue(List::of))
                 .build());
 
         // Org-aware JWT template -- embeds org context in tokens.

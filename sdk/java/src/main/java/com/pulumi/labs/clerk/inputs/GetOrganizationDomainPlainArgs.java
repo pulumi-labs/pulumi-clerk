@@ -16,14 +16,14 @@ public final class GetOrganizationDomainPlainArgs extends com.pulumi.resources.I
     public static final GetOrganizationDomainPlainArgs Empty = new GetOrganizationDomainPlainArgs();
 
     /**
-     * The domain name. Set either id or name.
+     * The domain name. Set either organizationDomainId or name.
      * 
      */
     @Import(name="name")
     private @Nullable String name;
 
     /**
-     * @return The domain name. Set either id or name.
+     * @return The domain name. Set either organizationDomainId or name.
      * 
      */
     public Optional<String> name() {
@@ -31,14 +31,14 @@ public final class GetOrganizationDomainPlainArgs extends com.pulumi.resources.I
     }
 
     /**
-     * The domain ID. Set either id or name.
+     * The domain ID: the bare Clerk ID, or the OrganizationDomain resource id (&#39;&lt;organizationId&gt;/&lt;domainId&gt;&#39;). Set either organizationDomainId or name.
      * 
      */
     @Import(name="organizationDomainId")
     private @Nullable String organizationDomainId;
 
     /**
-     * @return The domain ID. Set either id or name.
+     * @return The domain ID: the bare Clerk ID, or the OrganizationDomain resource id (&#39;&lt;organizationId&gt;/&lt;domainId&gt;&#39;). Set either organizationDomainId or name.
      * 
      */
     public Optional<String> organizationDomainId() {
@@ -87,7 +87,7 @@ public final class GetOrganizationDomainPlainArgs extends com.pulumi.resources.I
         }
 
         /**
-         * @param name The domain name. Set either id or name.
+         * @param name The domain name. Set either organizationDomainId or name.
          * 
          * @return builder
          * 
@@ -98,7 +98,7 @@ public final class GetOrganizationDomainPlainArgs extends com.pulumi.resources.I
         }
 
         /**
-         * @param organizationDomainId The domain ID. Set either id or name.
+         * @param organizationDomainId The domain ID: the bare Clerk ID, or the OrganizationDomain resource id (&#39;&lt;organizationId&gt;/&lt;domainId&gt;&#39;). Set either organizationDomainId or name.
          * 
          * @return builder
          * 

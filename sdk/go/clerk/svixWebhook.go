@@ -26,6 +26,10 @@ func NewSvixWebhook(ctx *pulumi.Context,
 		args = &SvixWebhookArgs{}
 	}
 
+	secrets := pulumi.AdditionalSecretOutputs([]string{
+		"svixUrl",
+	})
+	opts = append(opts, secrets)
 	opts = internal.PkgResourceDefaultOpts(opts)
 	var resource SvixWebhook
 	err := ctx.RegisterResource("clerk:index:SvixWebhook", name, args, &resource, opts...)

@@ -32,7 +32,7 @@ return await Deployment.RunAsync(() =>
             Key = "org:senior-engineer",
             Name = "Senior Engineer",
             Description = "Senior engineers with merge and deploy access",
-            Permissions = new[] { reposWritePermission.Key },
+            Permissions = new[] { reposWritePermission.Id },
         });
 
     // Org-aware JWT template -- embeds org context in tokens.

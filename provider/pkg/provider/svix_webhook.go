@@ -35,7 +35,7 @@ type SvixWebhookArgs struct{}
 // SvixWebhookState is the stored state of a SvixWebhook.
 type SvixWebhookState struct {
 	SvixWebhookArgs
-	SvixURL string `pulumi:"svixUrl"`
+	SvixURL string `pulumi:"svixUrl" provider:"secret"`
 }
 
 func (r *SvixWebhook) Annotate(a infer.Annotator) {
@@ -124,7 +124,7 @@ type GetSvixWebhookArgs struct{}
 // GetSvixWebhookResult is the Svix integration.
 type GetSvixWebhookResult struct {
 	ID      string `pulumi:"svixWebhookId"`
-	SvixURL string `pulumi:"svixUrl"`
+	SvixURL string `pulumi:"svixUrl" provider:"secret"`
 }
 
 func (f *GetSvixWebhook) Annotate(a infer.Annotator) {

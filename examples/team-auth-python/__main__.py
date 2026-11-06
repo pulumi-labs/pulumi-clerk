@@ -24,7 +24,7 @@ senior_engineer_role = clerk.OrganizationRole("senior-engineer",
     key="org:senior-engineer",
     name="Senior Engineer",
     description="Senior engineers with merge and deploy access",
-    permissions=[repos_write_permission.key],
+    permissions=[repos_write_permission.id],
 )
 
 # Org-aware JWT template -- embeds org context in tokens.

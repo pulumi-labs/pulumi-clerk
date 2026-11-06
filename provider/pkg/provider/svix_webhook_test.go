@@ -83,6 +83,8 @@ func TestSvixWebhook_Lifecycle(t *testing.T) {
 	require.Equal(t, "svix_webhook", created.ID)
 	require.Contains(t, getStr(t, created.Properties, "svixUrl"), "https://app.svix.com/")
 	require.True(t, fakeSvixOf(f).exists)
+	// The dashboard URL carries a login key: secret in the schema (the engine marks Create output from it), on Read and in lookups.
+	requireSecretInSchema(t, s, "SvixWebhook", "svixUrl")
 
 	// A second one is refused by Clerk.
 	_, err = s.Create(pgp.CreateRequest{Urn: clerkUrn("SvixWebhook", "w2"), Properties: inputs})
@@ -98,9 +100,11 @@ func TestSvixWebhook_Lifecycle(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "svix_webhook", read.ID)
 	require.NotEqual(t, getStr(t, created.Properties, "svixUrl"), getStr(t, read.Properties, "svixUrl"))
+	require.True(t, read.Properties.Get("svixUrl").Secret(), "svixUrl must be secret after refresh")
 	imp, err := s.Read(pgp.ReadRequest{ID: "svix_webhook", Urn: urn})
 	require.NoError(t, err)
 	require.NotEmpty(t, getStr(t, imp.Properties, "svixUrl"))
+	require.True(t, imp.Properties.Get("svixUrl").Secret(), "svixUrl must be secret after import")
 	d, err = s.Diff(pgp.DiffRequest{ID: imp.ID, Urn: urn, State: imp.Properties, Inputs: imp.Inputs, OldInputs: imp.Inputs})
 	require.NoError(t, err)
 	requireNoChanges(t, d)
@@ -117,6 +121,7 @@ func TestSvixWebhook_Lifecycle(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "svix_webhook", getStr(t, out, "svixWebhookId"))
 	require.NotEmpty(t, getStr(t, out, "svixUrl"))
+	require.True(t, out.Get("svixUrl").Secret(), "lookup result must keep the dashboard URL secret")
 
 	// Delete, then the integration is gone: Read is empty, Delete is quiet,
 	// and the lookup says so.

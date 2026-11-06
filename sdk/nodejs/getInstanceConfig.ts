@@ -28,7 +28,7 @@ export interface GetInstanceConfigArgs {
 
 export interface GetInstanceConfigResult {
     /**
-     * The instance configuration as a JSON object with sorted keys.
+     * The instance configuration as a JSON object with sorted keys. It is a secret because instance configuration can contain provider client secrets.
      */
     readonly config: string;
     /**

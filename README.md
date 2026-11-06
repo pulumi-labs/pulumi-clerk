@@ -116,7 +116,7 @@ role = clerk.OrganizationRole("senior-engineer",
     key="org:senior-engineer",
     name="Senior Engineer",
     description="Senior engineers with merge access",
-    permissions=[permission.key],
+    permissions=[permission.id],
 )
 
 pulumi.export("orgId", org.id)

@@ -17,14 +17,14 @@ public final class GetOrganizationDomainArgs extends com.pulumi.resources.Invoke
     public static final GetOrganizationDomainArgs Empty = new GetOrganizationDomainArgs();
 
     /**
-     * The domain name. Set either id or name.
+     * The domain name. Set either organizationDomainId or name.
      * 
      */
     @Import(name="name")
     private @Nullable Output<String> name;
 
     /**
-     * @return The domain name. Set either id or name.
+     * @return The domain name. Set either organizationDomainId or name.
      * 
      */
     public Optional<Output<String>> name() {
@@ -32,14 +32,14 @@ public final class GetOrganizationDomainArgs extends com.pulumi.resources.Invoke
     }
 
     /**
-     * The domain ID. Set either id or name.
+     * The domain ID: the bare Clerk ID, or the OrganizationDomain resource id (&#39;&lt;organizationId&gt;/&lt;domainId&gt;&#39;). Set either organizationDomainId or name.
      * 
      */
     @Import(name="organizationDomainId")
     private @Nullable Output<String> organizationDomainId;
 
     /**
-     * @return The domain ID. Set either id or name.
+     * @return The domain ID: the bare Clerk ID, or the OrganizationDomain resource id (&#39;&lt;organizationId&gt;/&lt;domainId&gt;&#39;). Set either organizationDomainId or name.
      * 
      */
     public Optional<Output<String>> organizationDomainId() {
@@ -88,7 +88,7 @@ public final class GetOrganizationDomainArgs extends com.pulumi.resources.Invoke
         }
 
         /**
-         * @param name The domain name. Set either id or name.
+         * @param name The domain name. Set either organizationDomainId or name.
          * 
          * @return builder
          * 
@@ -99,7 +99,7 @@ public final class GetOrganizationDomainArgs extends com.pulumi.resources.Invoke
         }
 
         /**
-         * @param name The domain name. Set either id or name.
+         * @param name The domain name. Set either organizationDomainId or name.
          * 
          * @return builder
          * 
@@ -109,7 +109,7 @@ public final class GetOrganizationDomainArgs extends com.pulumi.resources.Invoke
         }
 
         /**
-         * @param organizationDomainId The domain ID. Set either id or name.
+         * @param organizationDomainId The domain ID: the bare Clerk ID, or the OrganizationDomain resource id (&#39;&lt;organizationId&gt;/&lt;domainId&gt;&#39;). Set either organizationDomainId or name.
          * 
          * @return builder
          * 
@@ -120,7 +120,7 @@ public final class GetOrganizationDomainArgs extends com.pulumi.resources.Invoke
         }
 
         /**
-         * @param organizationDomainId The domain ID. Set either id or name.
+         * @param organizationDomainId The domain ID: the bare Clerk ID, or the OrganizationDomain resource id (&#39;&lt;organizationId&gt;/&lt;domainId&gt;&#39;). Set either organizationDomainId or name.
          * 
          * @return builder
          * 

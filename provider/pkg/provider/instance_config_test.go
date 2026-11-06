@@ -199,6 +199,7 @@ func TestInstanceConfig_Lifecycle(t *testing.T) {
 	out, err := invoke(t, s, "getInstanceConfig", map[string]property.Value{"applicationId": str("app_1"), "instanceId": str("ins_1")})
 	require.NoError(t, err)
 	require.Equal(t, "app_1/ins_1", getStr(t, out, "instanceConfigId"))
+	require.True(t, out.Get("config").Secret(), "the instance config can hold client secrets (#1599)")
 	jsonEq(t, `{"restrictions":{"allowlist":{"enabled":false}},"session":{"lifetime":7200},"unmanaged":"changed too"}`, getStr(t, out, "config"))
 	_, err = invoke(t, s, "getInstanceConfig", map[string]property.Value{"applicationId": str("app_1"), "instanceId": str("ins_missing")})
 	require.ErrorContains(t, err, "was not found")

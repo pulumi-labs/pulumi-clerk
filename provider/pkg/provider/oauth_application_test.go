@@ -156,6 +156,20 @@ func TestOauthApplication_Lifecycle(t *testing.T) {
 	d, err = s.Diff(pgp.DiffRequest{ID: created.ID, Urn: urn, State: imp.Properties, Inputs: imp.Inputs, OldInputs: imp.Inputs})
 	require.NoError(t, err)
 	requireNoChanges(t, d)
+	_, adopted := imp.Inputs.GetOk("consentScreenEnabled")
+	require.False(t, adopted, "import must not adopt the server default (#1563)")
+	// Reordered or partial scopes are not a change (Clerk reorders and adds
+	// implicit ones); a scope Clerk does not have is.
+	for _, scopes := range []string{"offline_access profile", "profile"} {
+		prog := with(imp.Inputs, map[string]property.Value{"scopes": str(scopes)})
+		d, err = s.Diff(pgp.DiffRequest{ID: created.ID, Urn: urn, State: imp.Properties, Inputs: prog, OldInputs: imp.Inputs})
+		require.NoError(t, err)
+		requireNoChanges(t, d)
+	}
+	d, err = s.Diff(pgp.DiffRequest{ID: created.ID, Urn: urn, State: imp.Properties, OldInputs: imp.Inputs,
+		Inputs: with(imp.Inputs, map[string]property.Value{"scopes": str("profile email")})})
+	require.NoError(t, err)
+	require.True(t, d.HasChanges)
 
 	// Lookup function by ID, client ID and name; never leaks the secret.
 	out, err := invoke(t, s, "getOauthApplication", map[string]property.Value{"oauthApplicationId": str(created.ID)})
@@ -210,3 +224,11 @@ func TestOauthApplication_ServerRejectionIsSurfaced(t *testing.T) {
 type oauthTestErr string
 
 func (e oauthTestErr) Error() string { return string(e) }
+
+// withProps returns m with the given properties set.
+func with(m property.Map, set map[string]property.Value) property.Map {
+	for k, v := range set {
+		m = m.Set(k, v)
+	}
+	return m
+}

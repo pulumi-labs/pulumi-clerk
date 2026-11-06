@@ -55,6 +55,8 @@ export class SvixWebhook extends pulumi.CustomResource {
             resourceInputs["svixUrl"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
+        const secretOpts = { additionalSecretOutputs: ["svixUrl"] };
+        opts = pulumi.mergeOptions(opts, secretOpts);
         super(SvixWebhook.__pulumiType, name, resourceInputs, opts);
     }
 }

@@ -23,9 +23,9 @@ func LookupOrganizationDomain(ctx *pulumi.Context, args *LookupOrganizationDomai
 }
 
 type LookupOrganizationDomainArgs struct {
-	// The domain name. Set either id or name.
+	// The domain name. Set either organizationDomainId or name.
 	Name *string `pulumi:"name"`
-	// The domain ID. Set either id or name.
+	// The domain ID: the bare Clerk ID, or the OrganizationDomain resource id ('<organizationId>/<domainId>'). Set either organizationDomainId or name.
 	OrganizationDomainId *string `pulumi:"organizationDomainId"`
 	// ID of the organization that owns the domain.
 	OrganizationId string `pulumi:"organizationId"`
@@ -53,9 +53,9 @@ func LookupOrganizationDomainOutput(ctx *pulumi.Context, args LookupOrganization
 }
 
 type LookupOrganizationDomainOutputArgs struct {
-	// The domain name. Set either id or name.
+	// The domain name. Set either organizationDomainId or name.
 	Name pulumi.StringPtrInput `pulumi:"name"`
-	// The domain ID. Set either id or name.
+	// The domain ID: the bare Clerk ID, or the OrganizationDomain resource id ('<organizationId>/<domainId>'). Set either organizationDomainId or name.
 	OrganizationDomainId pulumi.StringPtrInput `pulumi:"organizationDomainId"`
 	// ID of the organization that owns the domain.
 	OrganizationId pulumi.StringInput `pulumi:"organizationId"`

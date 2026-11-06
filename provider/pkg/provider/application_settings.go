@@ -176,8 +176,9 @@ func (r *ApplicationSettings) Read(ctx context.Context, req infer.ReadRequest[Ap
 	}
 	args := req.Inputs
 	if req.State.CreatorRole == "" && req.Inputs.MaxAllowedMemberships == nil && req.Inputs.AdminDeleteEnabled == nil && req.Inputs.DomainsEnabled == nil {
-		// Import: adopt everything Clerk reports.
-		args = ApplicationSettingsArgs{MaxAllowedMemberships: &got.MaxAllowedMemberships, AdminDeleteEnabled: &got.AdminDeleteEnabled, DomainsEnabled: &got.DomainsEnabled}
+		// Import: every input is optional and Clerk fills in defaults, so adopt
+		// none of them (#1563); the state outputs carry the server values.
+		args = ApplicationSettingsArgs{}
 	} else {
 		// Refresh: managed optional inputs follow the server so drift shows;
 		// unmanaged ones stay unset.

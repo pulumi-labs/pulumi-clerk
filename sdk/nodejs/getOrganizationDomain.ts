@@ -18,11 +18,11 @@ export function getOrganizationDomain(args: GetOrganizationDomainArgs, opts?: pu
 
 export interface GetOrganizationDomainArgs {
     /**
-     * The domain name. Set either id or name.
+     * The domain name. Set either organizationDomainId or name.
      */
     name?: string;
     /**
-     * The domain ID. Set either id or name.
+     * The domain ID: the bare Clerk ID, or the OrganizationDomain resource id ('<organizationId>/<domainId>'). Set either organizationDomainId or name.
      */
     organizationDomainId?: string;
     /**
@@ -56,11 +56,11 @@ export function getOrganizationDomainOutput(args: GetOrganizationDomainOutputArg
 
 export interface GetOrganizationDomainOutputArgs {
     /**
-     * The domain name. Set either id or name.
+     * The domain name. Set either organizationDomainId or name.
      */
     name?: pulumi.Input<string | undefined>;
     /**
-     * The domain ID. Set either id or name.
+     * The domain ID: the bare Clerk ID, or the OrganizationDomain resource id ('<organizationId>/<domainId>'). Set either organizationDomainId or name.
      */
     organizationDomainId?: pulumi.Input<string | undefined>;
     /**

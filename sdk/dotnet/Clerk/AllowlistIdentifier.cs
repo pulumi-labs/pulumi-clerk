@@ -35,7 +35,7 @@ namespace Pulumi.Labs.Clerk
         public Output<string> IdentifierType { get; private set; } = null!;
 
         /// <summary>
-        /// Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program. Changing this forces a new resource.
+        /// Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program: an entry that was imported, or that was created without it, has no recorded value, and setting it then changes nothing. Changing a recorded value forces a new resource (the old entry is deleted first). Removing the property after a value was recorded changes nothing.
         /// </summary>
         [Output("notify")]
         public Output<bool?> Notify { get; private set; } = null!;
@@ -70,11 +70,6 @@ namespace Pulumi.Labs.Clerk
             {
                 Version = Utilities.Version,
                 PluginDownloadURL = "github://api.github.com/pulumi-labs/pulumi-clerk",
-                ReplaceOnChanges =
-                {
-                    "identifier",
-                    "notify",
-                },
             };
             var merged = CustomResourceOptions.Merge(defaultOptions, options);
             // Override the ID if one was specified for consistency with other language SDKs.
@@ -104,7 +99,7 @@ namespace Pulumi.Labs.Clerk
         public Input<string> Identifier { get; set; } = null!;
 
         /// <summary>
-        /// Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program. Changing this forces a new resource.
+        /// Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program: an entry that was imported, or that was created without it, has no recorded value, and setting it then changes nothing. Changing a recorded value forces a new resource (the old entry is deleted first). Removing the property after a value was recorded changes nothing.
         /// </summary>
         [Input("notify")]
         public Input<bool>? Notify { get; set; }

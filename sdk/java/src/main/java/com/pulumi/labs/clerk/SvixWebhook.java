@@ -10,6 +10,7 @@ import com.pulumi.core.internal.Codegen;
 import com.pulumi.labs.clerk.SvixWebhookArgs;
 import com.pulumi.labs.clerk.Utilities;
 import java.lang.String;
+import java.util.List;
 import javax.annotation.Nullable;
 
 /**
@@ -73,6 +74,9 @@ public class SvixWebhook extends com.pulumi.resources.CustomResource {
         var defaultOptions = com.pulumi.resources.CustomResourceOptions.builder()
             .version(Utilities.getVersion())
             .pluginDownloadURL("github://api.github.com/pulumi-labs/pulumi-clerk")
+            .additionalSecretOutputs(List.of(
+                "svixUrl"
+            ))
             .build();
         return com.pulumi.resources.CustomResourceOptions.merge(defaultOptions, options, id);
     }
