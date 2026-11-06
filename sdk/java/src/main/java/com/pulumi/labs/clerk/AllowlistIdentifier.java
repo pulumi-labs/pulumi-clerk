@@ -11,7 +11,6 @@ import com.pulumi.labs.clerk.AllowlistIdentifierArgs;
 import com.pulumi.labs.clerk.Utilities;
 import java.lang.Boolean;
 import java.lang.String;
-import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
@@ -64,14 +63,14 @@ public class AllowlistIdentifier extends com.pulumi.resources.CustomResource {
         return this.identifierType;
     }
     /**
-     * Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program. Changing this forces a new resource.
+     * Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program: an entry that was imported, or that was created without it, has no recorded value, and setting it then changes nothing. Changing a recorded value forces a new resource (the old entry is deleted first). Removing the property after a value was recorded changes nothing.
      * 
      */
     @Export(name="notify", refs={Boolean.class}, tree="[0]")
     private Output</* @Nullable */ Boolean> notify;
 
     /**
-     * @return Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program. Changing this forces a new resource.
+     * @return Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program: an entry that was imported, or that was created without it, has no recorded value, and setting it then changes nothing. Changing a recorded value forces a new resource (the old entry is deleted first). Removing the property after a value was recorded changes nothing.
      * 
      */
     public Output<Optional<Boolean>> notify_() {
@@ -132,10 +131,6 @@ public class AllowlistIdentifier extends com.pulumi.resources.CustomResource {
         var defaultOptions = com.pulumi.resources.CustomResourceOptions.builder()
             .version(Utilities.getVersion())
             .pluginDownloadURL("github://api.github.com/pulumi-labs/pulumi-clerk")
-            .replaceOnChanges(List.of(
-                "identifier",
-                "notify"
-            ))
             .build();
         return com.pulumi.resources.CustomResourceOptions.merge(defaultOptions, options, id);
     }

@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net/http"
 
+	pgp "github.com/pulumi/pulumi-go-provider"
 	"github.com/pulumi/pulumi-go-provider/infer"
 )
 
@@ -30,9 +31,9 @@ type AllowlistIdentifier struct{}
 // AllowlistIdentifierArgs are the inputs of an AllowlistIdentifier.
 type AllowlistIdentifierArgs struct {
 	// Identifier is the email address, phone number or web3 wallet to allow. Wildcards such as *@example.com are supported for email addresses.
-	Identifier string `pulumi:"identifier" provider:"replaceOnChanges"`
+	Identifier string `pulumi:"identifier"`
 	// Notify sends an invitation email to the identifier when it is created.
-	Notify *bool `pulumi:"notify,optional" provider:"replaceOnChanges"`
+	Notify *bool `pulumi:"notify,optional"`
 }
 
 // AllowlistIdentifierState is the stored state of an AllowlistIdentifier.
@@ -49,7 +50,28 @@ func (r *AllowlistIdentifier) Annotate(a infer.Annotator) {
 
 func (a *AllowlistIdentifierArgs) Annotate(ann infer.Annotator) {
 	ann.Describe(&a.Identifier, "The email address, phone number or web3 wallet to allow, for example an email address, a phone number, a web3 wallet or an email wildcard like *@example.com. Changing this forces a new resource.")
-	ann.Describe(&a.Notify, "Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program. Changing this forces a new resource.")
+	ann.Describe(&a.Notify, "Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program: an entry that was imported, or that was created without it, has no recorded value, and setting it then changes nothing. Changing a recorded value forces a new resource (the old entry is deleted first). Removing the property after a value was recorded changes nothing.")
+}
+
+var _ infer.CustomDiff[AllowlistIdentifierArgs, AllowlistIdentifierState] = (*AllowlistIdentifier)(nil)
+
+// Diff replaces the entry when the identifier changes, or when a recorded
+// notify value changes. Clerk never reports notify, so an imported entry has
+// none recorded: a program that sets it afterwards must not delete and
+// recreate the entry (and, with notify true, send the invitation again) (#1562).
+func (r *AllowlistIdentifier) Diff(_ context.Context, req infer.DiffRequest[AllowlistIdentifierArgs, AllowlistIdentifierState]) (infer.DiffResponse, error) {
+	diff := map[string]pgp.PropertyDiff{}
+	if req.Inputs.Identifier != req.State.Identifier {
+		diff["identifier"] = pgp.PropertyDiff{Kind: pgp.UpdateReplace, InputDiff: true}
+	}
+	deleteFirst := false
+	if o, n := req.State.Notify, req.Inputs.Notify; o != nil && n != nil && *o != *n {
+		diff["notify"] = pgp.PropertyDiff{Kind: pgp.UpdateReplace, InputDiff: true}
+		// The identifier is the same, and Clerk rejects a duplicate entry, so
+		// the old entry has to go before the new one is created.
+		deleteFirst = true
+	}
+	return infer.DiffResponse{HasChanges: len(diff) > 0, DetailedDiff: diff, DeleteBeforeReplace: deleteFirst}, nil
 }
 
 func (s *AllowlistIdentifierState) Annotate(ann infer.Annotator) {

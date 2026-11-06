@@ -50,14 +50,14 @@ public class OrganizationDomain extends com.pulumi.resources.CustomResource {
         return this.createdAt;
     }
     /**
-     * Enrollment mode: manual_invitation, automatic_invitation or automatic_suggestion. Defaults to the instance setting when unset.
+     * Enrollment mode: manual_invitation, automatic_invitation, automatic_suggestion or enterprise_sso. Clerk requires a mode when a domain is created, so it is manual_invitation (the most restrictive) when unset. Left unset, the mode is unmanaged afterwards: refresh and import report Clerk&#39;s value in the state output and do not copy it into inputs.
      * 
      */
     @Export(name="enrollmentMode", refs={String.class}, tree="[0]")
     private Output</* @Nullable */ String> enrollmentMode;
 
     /**
-     * @return Enrollment mode: manual_invitation, automatic_invitation or automatic_suggestion. Defaults to the instance setting when unset.
+     * @return Enrollment mode: manual_invitation, automatic_invitation, automatic_suggestion or enterprise_sso. Clerk requires a mode when a domain is created, so it is manual_invitation (the most restrictive) when unset. Left unset, the mode is unmanaged afterwards: refresh and import report Clerk&#39;s value in the state output and do not copy it into inputs.
      * 
      */
     public Output<Optional<String>> enrollmentMode() {

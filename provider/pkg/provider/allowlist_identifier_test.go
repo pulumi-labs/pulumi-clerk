@@ -126,6 +126,32 @@ func TestAllowlistIdentifier_Notify(t *testing.T) {
 		Inputs: pm(map[string]property.Value{"identifier": str("*@example.com"), "notify": boolean(false)})})
 	require.NoError(t, err)
 	require.Equal(t, pgp.UpdateReplace, d.DetailedDiff["notify"].Kind)
+	require.True(t, d.DeleteBeforeReplace, "same identifier: Clerk rejects a duplicate, so delete first")
+}
+
+// #1562: Clerk never reports notify, so an imported entry has none recorded and
+// a program that sets it must not replace the entry.
+func TestAllowlistIdentifier_ImportThenSetNotifyIsNoChange(t *testing.T) {
+	f := startFakeClerk(t)
+	s := serverFor(t, f)
+	urn := clerkUrn("AllowlistIdentifier", "a")
+	created, err := s.Create(pgp.CreateRequest{Urn: urn, Properties: pm(map[string]property.Value{"identifier": str("a@example.com")})})
+	require.NoError(t, err)
+	imp, err := s.Read(pgp.ReadRequest{ID: created.ID, Urn: urn})
+	require.NoError(t, err)
+	_, has := imp.Inputs.GetOk("notify")
+	require.False(t, has)
+	for _, notify := range []bool{false, true} {
+		program := pm(map[string]property.Value{"identifier": str("a@example.com"), "notify": boolean(notify)})
+		d, err := s.Diff(pgp.DiffRequest{ID: created.ID, Urn: urn, State: imp.Properties, Inputs: program, OldInputs: imp.Inputs})
+		require.NoError(t, err)
+		requireNoChanges(t, d)
+	}
+	// A different identifier still replaces.
+	d, err := s.Diff(pgp.DiffRequest{ID: created.ID, Urn: urn, State: imp.Properties, OldInputs: imp.Inputs,
+		Inputs: pm(map[string]property.Value{"identifier": str("b@example.com")})})
+	require.NoError(t, err)
+	require.Equal(t, pgp.UpdateReplace, d.DetailedDiff["identifier"].Kind)
 }
 
 // A dry run never calls the API.

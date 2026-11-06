@@ -155,7 +155,8 @@ func (r *Machine) Read(ctx context.Context, req infer.ReadRequest[MachineArgs, M
 	in := req.Inputs
 	imported := in.Name == ""
 	in.Name = got.Name
-	if imported || in.DefaultTokenTtl != nil {
+	// Import adopts nothing optional: Clerk's default is in effectiveDefaultTokenTtl (#1563).
+	if !imported && in.DefaultTokenTtl != nil {
 		v := got.DefaultTokenTTL
 		in.DefaultTokenTtl = &v
 	}

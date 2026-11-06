@@ -18,9 +18,13 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/pulumi/pulumi-go-provider/infer"
 )
+
+// defaultEnrollmentMode is sent when the program leaves enrollmentMode unset.
+const defaultEnrollmentMode = "manual_invitation"
 
 // OrganizationDomain is a verified or pending domain of a Clerk organization,
 // used for automatic invitations and suggestions.
@@ -54,7 +58,7 @@ func (r *OrganizationDomain) Annotate(a infer.Annotator) {
 func (a *OrganizationDomainArgs) Annotate(ann infer.Annotator) {
 	ann.Describe(&a.OrganizationID, "ID of the organization. Changing this forces a new resource.")
 	ann.Describe(&a.Name, "The domain name, for example example.com. Changing this forces a new resource.")
-	ann.Describe(&a.EnrollmentMode, "Enrollment mode: manual_invitation, automatic_invitation or automatic_suggestion. Defaults to the instance setting when unset.")
+	ann.Describe(&a.EnrollmentMode, "Enrollment mode: manual_invitation, automatic_invitation, automatic_suggestion or enterprise_sso. Clerk requires a mode when a domain is created, so it is manual_invitation (the most restrictive) when unset. Left unset, the mode is unmanaged afterwards: refresh and import report Clerk's value in the state output and do not copy it into inputs.")
 	ann.Describe(&a.Verified, "Whether the domain is verified. Set true to verify the domain on creation without an email check. Reports the domain's current verification state.")
 }
 
@@ -146,7 +150,10 @@ func (r *OrganizationDomain) Create(ctx context.Context, req infer.CreateRequest
 	if err != nil {
 		return infer.CreateResponse[OrganizationDomainState]{}, err
 	}
-	body := map[string]any{"name": in.Name}
+	// The API requires enrollment_mode on create (it has no default and
+	// answers 422 without it, #1565), so an unset input becomes the most
+	// restrictive mode instead of a failed create.
+	body := map[string]any{"name": in.Name, "enrollment_mode": defaultEnrollmentMode}
 	if in.EnrollmentMode != nil {
 		body["enrollment_mode"] = *in.EnrollmentMode
 	}
@@ -280,15 +287,22 @@ func (f *GetOrganizationDomain) Annotate(a infer.Annotator) {
 
 func (a *GetOrganizationDomainArgs) Annotate(ann infer.Annotator) {
 	ann.Describe(&a.OrganizationID, "ID of the organization that owns the domain.")
-	ann.Describe(&a.ID, "The domain ID. Set either id or name.")
-	ann.Describe(&a.Name, "The domain name. Set either id or name.")
+	ann.Describe(&a.ID, "The domain ID: the bare Clerk ID, or the OrganizationDomain resource id ('<organizationId>/<domainId>'). Set either organizationDomainId or name.")
+	ann.Describe(&a.Name, "The domain name. Set either organizationDomainId or name.")
 }
 
 func (f *GetOrganizationDomain) Invoke(ctx context.Context, req infer.FunctionRequest[GetOrganizationDomainArgs]) (infer.FunctionResponse[GetOrganizationDomainResult], error) {
 	out := infer.FunctionResponse[GetOrganizationDomainResult]{}
 	id, name := derefStr(req.Input.ID), derefStr(req.Input.Name)
 	if (id == "") == (name == "") {
-		return out, fmt.Errorf("clerk: getOrganizationDomain needs exactly one of id or name")
+		return out, fmt.Errorf("clerk: getOrganizationDomain needs exactly one of organizationDomainId or name")
+	}
+	// The resource's own id is "<organizationId>/<domainId>" (#1566), so accept
+	// that form as well as the bare domain id.
+	if bare := strings.TrimPrefix(id, req.Input.OrganizationID+"/"); bare != "" || id == "" {
+		id = bare
+	} else {
+		return out, fmt.Errorf("clerk: getOrganizationDomain: organizationDomainId %q names no domain", id)
 	}
 	c, err := backendClient(ctx)
 	if err != nil {

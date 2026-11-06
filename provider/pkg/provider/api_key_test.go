@@ -195,6 +195,7 @@ func TestApiKey_Lifecycle(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "ci-key", getStr(t, imp.Inputs, "name"))
 	require.Equal(t, "ak_live_"+created.ID, getStr(t, imp.Properties, "secret"))
+	require.True(t, imp.Properties.Get("secret").Secret(), "an imported secret must be a secret (#1564)")
 	require.Equal(t, `{"a":2,"b":1}`, getStr(t, imp.Inputs, "claims"))
 	d, err = s.Diff(pgp.DiffRequest{ID: created.ID, Urn: urn, State: imp.Properties, Inputs: imp.Inputs, OldInputs: imp.Inputs})
 	require.NoError(t, err)

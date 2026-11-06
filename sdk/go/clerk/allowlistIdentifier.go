@@ -22,7 +22,7 @@ type AllowlistIdentifier struct {
 	Identifier pulumi.StringOutput `pulumi:"identifier"`
 	// The kind of identifier: email_address, phone_number or web3_wallet.
 	IdentifierType pulumi.StringOutput `pulumi:"identifierType"`
-	// Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program. Changing this forces a new resource.
+	// Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program: an entry that was imported, or that was created without it, has no recorded value, and setting it then changes nothing. Changing a recorded value forces a new resource (the old entry is deleted first). Removing the property after a value was recorded changes nothing.
 	Notify pulumi.BoolPtrOutput `pulumi:"notify"`
 	// When the entry was last updated (RFC 3339).
 	UpdatedAt pulumi.StringOutput `pulumi:"updatedAt"`
@@ -38,11 +38,6 @@ func NewAllowlistIdentifier(ctx *pulumi.Context,
 	if args.Identifier == nil {
 		return nil, errors.New("invalid value for required argument 'Identifier'")
 	}
-	replaceOnChanges := pulumi.ReplaceOnChanges([]string{
-		"identifier",
-		"notify",
-	})
-	opts = append(opts, replaceOnChanges)
 	opts = internal.PkgResourceDefaultOpts(opts)
 	var resource AllowlistIdentifier
 	err := ctx.RegisterResource("clerk:index:AllowlistIdentifier", name, args, &resource, opts...)
@@ -78,7 +73,7 @@ func (AllowlistIdentifierState) ElementType() reflect.Type {
 type allowlistIdentifierArgs struct {
 	// The email address, phone number or web3 wallet to allow, for example an email address, a phone number, a web3 wallet or an email wildcard like *@example.com. Changing this forces a new resource.
 	Identifier string `pulumi:"identifier"`
-	// Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program. Changing this forces a new resource.
+	// Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program: an entry that was imported, or that was created without it, has no recorded value, and setting it then changes nothing. Changing a recorded value forces a new resource (the old entry is deleted first). Removing the property after a value was recorded changes nothing.
 	Notify *bool `pulumi:"notify"`
 }
 
@@ -86,7 +81,7 @@ type allowlistIdentifierArgs struct {
 type AllowlistIdentifierArgs struct {
 	// The email address, phone number or web3 wallet to allow, for example an email address, a phone number, a web3 wallet or an email wildcard like *@example.com. Changing this forces a new resource.
 	Identifier pulumi.StringInput
-	// Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program. Changing this forces a new resource.
+	// Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program: an entry that was imported, or that was created without it, has no recorded value, and setting it then changes nothing. Changing a recorded value forces a new resource (the old entry is deleted first). Removing the property after a value was recorded changes nothing.
 	Notify pulumi.BoolPtrInput
 }
 
@@ -192,7 +187,7 @@ func (o AllowlistIdentifierOutput) IdentifierType() pulumi.StringOutput {
 	return o.ApplyT(func(v *AllowlistIdentifier) pulumi.StringOutput { return v.IdentifierType }).(pulumi.StringOutput)
 }
 
-// Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program. Changing this forces a new resource.
+// Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program: an entry that was imported, or that was created without it, has no recorded value, and setting it then changes nothing. Changing a recorded value forces a new resource (the old entry is deleted first). Removing the property after a value was recorded changes nothing.
 func (o AllowlistIdentifierOutput) Notify() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *AllowlistIdentifier) pulumi.BoolPtrOutput { return v.Notify }).(pulumi.BoolPtrOutput)
 }

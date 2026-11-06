@@ -38,7 +38,7 @@ class GetInstanceConfigResult:
     @pulumi.getter
     def config(self) -> _builtins.str:
         """
-        The instance configuration as a JSON object with sorted keys.
+        The instance configuration as a JSON object with sorted keys. It is a secret because instance configuration can contain provider client secrets.
         """
         return pulumi.get(self, "config")
 

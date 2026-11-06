@@ -26,6 +26,9 @@ resources:
     type: clerk:JwtTemplate
     properties:
       name: ${templateName}
-      claims: ${claimsJson}
+      # The YAML runtime parses a JSON-looking config value into an object even when it is declared
+      # as a string, and `claims` is a string property: fn::toJSON turns it back into the JSON text.
+      claims:
+        fn::toJSON: ${claimsJson}
 outputs:
   templateId: ${jwt-template.id}

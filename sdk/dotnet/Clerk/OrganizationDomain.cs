@@ -29,7 +29,7 @@ namespace Pulumi.Labs.Clerk
         public Output<string> CreatedAt { get; private set; } = null!;
 
         /// <summary>
-        /// Enrollment mode: manual_invitation, automatic_invitation or automatic_suggestion. Defaults to the instance setting when unset.
+        /// Enrollment mode: manual_invitation, automatic_invitation, automatic_suggestion or enterprise_sso. Clerk requires a mode when a domain is created, so it is manual_invitation (the most restrictive) when unset. Left unset, the mode is unmanaged afterwards: refresh and import report Clerk's value in the state output and do not copy it into inputs.
         /// </summary>
         [Output("enrollmentMode")]
         public Output<string?> EnrollmentMode { get; private set; } = null!;
@@ -116,7 +116,7 @@ namespace Pulumi.Labs.Clerk
     public sealed class OrganizationDomainArgs : global::Pulumi.ResourceArgs
     {
         /// <summary>
-        /// Enrollment mode: manual_invitation, automatic_invitation or automatic_suggestion. Defaults to the instance setting when unset.
+        /// Enrollment mode: manual_invitation, automatic_invitation, automatic_suggestion or enterprise_sso. Clerk requires a mode when a domain is created, so it is manual_invitation (the most restrictive) when unset. Left unset, the mode is unmanaged afterwards: refresh and import report Clerk's value in the state output and do not copy it into inputs.
         /// </summary>
         [Input("enrollmentMode")]
         public Input<string>? EnrollmentMode { get; set; }

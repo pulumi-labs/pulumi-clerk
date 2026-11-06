@@ -65,7 +65,12 @@ func init() {
 			org := r.PathValue("orgId")
 			mode, _ := body["enrollment_mode"].(string)
 			if mode == "" {
-				mode = "manual_invitation"
+				// Like the live API: the parameter is required (#1565).
+				writeJSON(w, http.StatusUnprocessableEntity, map[string]any{"errors": []map[string]any{{
+					"code": "form_param_value_invalid", "message": "is invalid",
+					"long_message": "does not match the allowed values for parameter enrollment_mode. Allowed values: manual_invitation, automatic_invitation, automatic_suggestion or enterprise_sso",
+				}}})
+				return
 			}
 			verified, _ := body["verified"].(bool)
 			now := time.Now().UnixMilli()
@@ -186,6 +191,19 @@ func TestOrganizationDomain_Lifecycle(t *testing.T) {
 	require.Equal(t, "automatic_invitation", getStr(t, out, "enrollmentMode"))
 	require.True(t, out.Get("verified").AsBool())
 	_, err = invoke(t, s, "getOrganizationDomain", map[string]property.Value{"organizationId": str("org_1"), "name": str("nope.com")})
+	require.ErrorContains(t, err, "was not found")
+	// #1566: the resource's own composite id and the bare id both match.
+	_, bareID, _ := splitID("d", "o", created.ID)
+	for _, id := range []string{created.ID, bareID} {
+		out, err = invoke(t, s, "getOrganizationDomain", map[string]property.Value{"organizationId": str("org_1"), "organizationDomainId": str(id)})
+		require.NoError(t, err, id)
+		require.Equal(t, "example.com", getStr(t, out, "name"))
+	}
+	// An id that is only the organization prefix names no domain.
+	_, err = invoke(t, s, "getOrganizationDomain", map[string]property.Value{"organizationId": str("org_1"), "organizationDomainId": str("org_1/")})
+	require.ErrorContains(t, err, "names no domain")
+	// An id of another organization does not match.
+	_, err = invoke(t, s, "getOrganizationDomain", map[string]property.Value{"organizationId": str("org_1"), "organizationDomainId": str("org_2/" + bareID)})
 	require.ErrorContains(t, err, "was not found")
 
 	// Deleted outside Pulumi (domain, then whole organization): Read reports gone, Delete is quiet.

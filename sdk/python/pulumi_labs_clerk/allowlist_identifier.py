@@ -25,7 +25,7 @@ class AllowlistIdentifierArgs:
         The set of arguments for constructing a AllowlistIdentifier resource.
 
         :param pulumi.Input[_builtins.str] identifier: The email address, phone number or web3 wallet to allow, for example an email address, a phone number, a web3 wallet or an email wildcard like *@example.com. Changing this forces a new resource.
-        :param pulumi.Input[_builtins.bool] notify: Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program. Changing this forces a new resource.
+        :param pulumi.Input[_builtins.bool] notify: Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program: an entry that was imported, or that was created without it, has no recorded value, and setting it then changes nothing. Changing a recorded value forces a new resource (the old entry is deleted first). Removing the property after a value was recorded changes nothing.
         """
         pulumi.set(__self__, "identifier", identifier)
         if notify is not None:
@@ -47,7 +47,7 @@ class AllowlistIdentifierArgs:
     @pulumi.getter
     def notify(self) -> Optional[pulumi.Input[_builtins.bool]]:
         """
-        Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program. Changing this forces a new resource.
+        Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program: an entry that was imported, or that was created without it, has no recorded value, and setting it then changes nothing. Changing a recorded value forces a new resource (the old entry is deleted first). Removing the property after a value was recorded changes nothing.
         """
         return pulumi.get(self, "notify")
 
@@ -72,7 +72,7 @@ class AllowlistIdentifier(pulumi.CustomResource):
         :param str resource_name: The name of the resource.
         :param pulumi.ResourceOptions opts: Options for the resource.
         :param pulumi.Input[_builtins.str] identifier: The email address, phone number or web3 wallet to allow, for example an email address, a phone number, a web3 wallet or an email wildcard like *@example.com. Changing this forces a new resource.
-        :param pulumi.Input[_builtins.bool] notify: Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program. Changing this forces a new resource.
+        :param pulumi.Input[_builtins.bool] notify: Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program: an entry that was imported, or that was created without it, has no recorded value, and setting it then changes nothing. Changing a recorded value forces a new resource (the old entry is deleted first). Removing the property after a value was recorded changes nothing.
         """
         ...
     @overload
@@ -117,8 +117,6 @@ class AllowlistIdentifier(pulumi.CustomResource):
             __props__.__dict__["created_at"] = None
             __props__.__dict__["identifier_type"] = None
             __props__.__dict__["updated_at"] = None
-        replace_on_changes = pulumi.ResourceOptions(replace_on_changes=["identifier", "notify"])
-        opts = pulumi.ResourceOptions.merge(opts, replace_on_changes)
         super(AllowlistIdentifier, __self__).__init__(
             'clerk:index:AllowlistIdentifier',
             resource_name,
@@ -176,7 +174,7 @@ class AllowlistIdentifier(pulumi.CustomResource):
     @pulumi.getter
     def notify(self) -> pulumi.Output[Optional[_builtins.bool]]:
         """
-        Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program. Changing this forces a new resource.
+        Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program: an entry that was imported, or that was created without it, has no recorded value, and setting it then changes nothing. Changing a recorded value forces a new resource (the old entry is deleted first). Removing the property after a value was recorded changes nothing.
         """
         return pulumi.get(self, "notify")
 

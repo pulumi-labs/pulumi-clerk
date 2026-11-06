@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"strings"
 
+	pgp "github.com/pulumi/pulumi-go-provider"
 	"github.com/pulumi/pulumi-go-provider/infer"
 )
 
@@ -173,6 +174,34 @@ func (r *OauthApplication) Create(ctx context.Context, req infer.CreateRequest[O
 	return infer.CreateResponse[OauthApplicationState]{ID: out.ID, Output: out.outputs(req.Inputs, derefStr(out.ClientSecret))}, nil
 }
 
+var _ infer.CustomDiff[OauthApplicationArgs, OauthApplicationState] = (*OauthApplication)(nil)
+
+// Diff updates in place and replaces only on a change of public. Scopes are
+// compared the way Clerk keeps them: order and the implicit scopes Clerk adds
+// are not a change, so an imported application whose stored scopes are
+// "email offline_access profile" matches a program that declares "profile
+// email" (#1563). An unset consentScreenEnabled is unmanaged.
+func (r *OauthApplication) Diff(_ context.Context, req infer.DiffRequest[OauthApplicationArgs, OauthApplicationState]) (infer.DiffResponse, error) {
+	diff := map[string]pgp.PropertyDiff{}
+	in, st := req.Inputs, req.State
+	if in.Name != st.Name {
+		diff["name"] = pgp.PropertyDiff{Kind: pgp.Update, InputDiff: true}
+	}
+	if in.CallbackUrl != st.CallbackUrl {
+		diff["callbackUrl"] = pgp.PropertyDiff{Kind: pgp.Update, InputDiff: true}
+	}
+	if !scopesSatisfied(in.Scopes, st.EffectiveScopes) && !scopesSatisfied(in.Scopes, st.Scopes) {
+		diff["scopes"] = pgp.PropertyDiff{Kind: pgp.Update, InputDiff: true}
+	}
+	if in.Public != st.Public {
+		diff["public"] = pgp.PropertyDiff{Kind: pgp.UpdateReplace, InputDiff: true}
+	}
+	if in.ConsentScreenEnabled != nil && (st.ConsentScreenEnabled == nil || *in.ConsentScreenEnabled != *st.ConsentScreenEnabled) {
+		diff["consentScreenEnabled"] = pgp.PropertyDiff{Kind: pgp.Update, InputDiff: true}
+	}
+	return infer.DiffResponse{HasChanges: len(diff) > 0, DetailedDiff: diff}, nil
+}
+
 func (r *OauthApplication) Read(ctx context.Context, req infer.ReadRequest[OauthApplicationArgs, OauthApplicationState]) (infer.ReadResponse[OauthApplicationArgs, OauthApplicationState], error) {
 	empty := infer.ReadResponse[OauthApplicationArgs, OauthApplicationState]{}
 	c, err := backendClient(ctx)
@@ -194,7 +223,8 @@ func (r *OauthApplication) Read(ctx context.Context, req infer.ReadRequest[Oauth
 	if imported || !scopesSatisfied(in.Scopes, got.Scopes) {
 		in.Scopes = got.Scopes
 	}
-	if imported || in.ConsentScreenEnabled != nil {
+	// Import adopts nothing optional: Clerk's default is in effectiveConsentScreenEnabled (#1563).
+	if !imported && in.ConsentScreenEnabled != nil {
 		v := got.ConsentScreenEnabled
 		in.ConsentScreenEnabled = &v
 	}

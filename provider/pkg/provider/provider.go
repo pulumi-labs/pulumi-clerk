@@ -85,9 +85,9 @@ func lookupErr(kind, what string, err error) error {
 }
 
 // New returns the configured Clerk Pulumi provider.
-func New() (pgp.Provider, error) {
+func newProvider() (pgp.Provider, error) {
 	const desc = "Experimental: manage Clerk (clerk.com) authentication infrastructure as code: allowlists, blocklists, JWT templates, organizations and their roles and permissions, OAuth applications, SAML connections, API keys, machines and webhooks."
-	return infer.NewProviderBuilder().
+	p, err := infer.NewProviderBuilder().
 		WithDisplayName("Clerk").
 		WithDescription(desc).
 		WithHomepage("https://clerk.com").
@@ -161,4 +161,8 @@ func New() (pgp.Provider, error) {
 			infer.Function[*GetApplicationSettings, GetApplicationSettingsArgs, GetApplicationSettingsResult](&GetApplicationSettings{}),
 		).
 		Build()
+	if err != nil {
+		return p, err
+	}
+	return wrapReadSecrets(p), nil
 }

@@ -45,7 +45,7 @@ func main() {
 			Key:         pulumi.String("org:senior-engineer"),
 			Name:        pulumi.String("Senior Engineer"),
 			Description: pulumi.String("Senior engineers with merge and deploy access"),
-			Permissions: pulumi.StringArray{reposWritePermission.Key},
+			Permissions: pulumi.StringArray{reposWritePermission.ID().ToStringOutput()},
 		})
 		if err != nil {
 			return err

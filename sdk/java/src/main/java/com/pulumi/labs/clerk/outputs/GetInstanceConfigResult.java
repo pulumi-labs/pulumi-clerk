@@ -11,7 +11,7 @@ import java.util.Objects;
 @CustomType
 public final class GetInstanceConfigResult {
     /**
-     * @return The instance configuration as a JSON object with sorted keys.
+     * @return The instance configuration as a JSON object with sorted keys. It is a secret because instance configuration can contain provider client secrets.
      * 
      */
     private String config;
@@ -28,7 +28,7 @@ public final class GetInstanceConfigResult {
 
     private GetInstanceConfigResult() {}
     /**
-     * @return The instance configuration as a JSON object with sorted keys.
+     * @return The instance configuration as a JSON object with sorted keys. It is a secret because instance configuration can contain provider client secrets.
      * 
      */
     public String config() {

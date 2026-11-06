@@ -20,7 +20,7 @@ type OrganizationDomain struct {
 	AffiliationEmailAddress pulumi.StringOutput `pulumi:"affiliationEmailAddress"`
 	// When the domain was created (RFC 3339).
 	CreatedAt pulumi.StringOutput `pulumi:"createdAt"`
-	// Enrollment mode: manual_invitation, automatic_invitation or automatic_suggestion. Defaults to the instance setting when unset.
+	// Enrollment mode: manual_invitation, automatic_invitation, automatic_suggestion or enterprise_sso. Clerk requires a mode when a domain is created, so it is manual_invitation (the most restrictive) when unset. Left unset, the mode is unmanaged afterwards: refresh and import report Clerk's value in the state output and do not copy it into inputs.
 	EnrollmentMode pulumi.StringPtrOutput `pulumi:"enrollmentMode"`
 	// The domain name, for example example.com. Changing this forces a new resource.
 	Name pulumi.StringOutput `pulumi:"name"`
@@ -85,7 +85,7 @@ func (OrganizationDomainState) ElementType() reflect.Type {
 }
 
 type organizationDomainArgs struct {
-	// Enrollment mode: manual_invitation, automatic_invitation or automatic_suggestion. Defaults to the instance setting when unset.
+	// Enrollment mode: manual_invitation, automatic_invitation, automatic_suggestion or enterprise_sso. Clerk requires a mode when a domain is created, so it is manual_invitation (the most restrictive) when unset. Left unset, the mode is unmanaged afterwards: refresh and import report Clerk's value in the state output and do not copy it into inputs.
 	EnrollmentMode *string `pulumi:"enrollmentMode"`
 	// The domain name, for example example.com. Changing this forces a new resource.
 	Name string `pulumi:"name"`
@@ -97,7 +97,7 @@ type organizationDomainArgs struct {
 
 // The set of arguments for constructing a OrganizationDomain resource.
 type OrganizationDomainArgs struct {
-	// Enrollment mode: manual_invitation, automatic_invitation or automatic_suggestion. Defaults to the instance setting when unset.
+	// Enrollment mode: manual_invitation, automatic_invitation, automatic_suggestion or enterprise_sso. Clerk requires a mode when a domain is created, so it is manual_invitation (the most restrictive) when unset. Left unset, the mode is unmanaged afterwards: refresh and import report Clerk's value in the state output and do not copy it into inputs.
 	EnrollmentMode pulumi.StringPtrInput
 	// The domain name, for example example.com. Changing this forces a new resource.
 	Name pulumi.StringInput
@@ -204,7 +204,7 @@ func (o OrganizationDomainOutput) CreatedAt() pulumi.StringOutput {
 	return o.ApplyT(func(v *OrganizationDomain) pulumi.StringOutput { return v.CreatedAt }).(pulumi.StringOutput)
 }
 
-// Enrollment mode: manual_invitation, automatic_invitation or automatic_suggestion. Defaults to the instance setting when unset.
+// Enrollment mode: manual_invitation, automatic_invitation, automatic_suggestion or enterprise_sso. Clerk requires a mode when a domain is created, so it is manual_invitation (the most restrictive) when unset. Left unset, the mode is unmanaged afterwards: refresh and import report Clerk's value in the state output and do not copy it into inputs.
 func (o OrganizationDomainOutput) EnrollmentMode() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *OrganizationDomain) pulumi.StringPtrOutput { return v.EnrollmentMode }).(pulumi.StringPtrOutput)
 }

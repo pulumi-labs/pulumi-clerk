@@ -28,7 +28,7 @@ class OrganizationDomainArgs:
 
         :param pulumi.Input[_builtins.str] name: The domain name, for example example.com. Changing this forces a new resource.
         :param pulumi.Input[_builtins.str] organization_id: ID of the organization. Changing this forces a new resource.
-        :param pulumi.Input[_builtins.str] enrollment_mode: Enrollment mode: manual_invitation, automatic_invitation or automatic_suggestion. Defaults to the instance setting when unset.
+        :param pulumi.Input[_builtins.str] enrollment_mode: Enrollment mode: manual_invitation, automatic_invitation, automatic_suggestion or enterprise_sso. Clerk requires a mode when a domain is created, so it is manual_invitation (the most restrictive) when unset. Left unset, the mode is unmanaged afterwards: refresh and import report Clerk's value in the state output and do not copy it into inputs.
         :param pulumi.Input[_builtins.bool] verified: Whether the domain is verified. Set true to verify the domain on creation without an email check. Reports the domain's current verification state.
         """
         pulumi.set(__self__, "name", name)
@@ -66,7 +66,7 @@ class OrganizationDomainArgs:
     @pulumi.getter(name="enrollmentMode")
     def enrollment_mode(self) -> Optional[pulumi.Input[_builtins.str]]:
         """
-        Enrollment mode: manual_invitation, automatic_invitation or automatic_suggestion. Defaults to the instance setting when unset.
+        Enrollment mode: manual_invitation, automatic_invitation, automatic_suggestion or enterprise_sso. Clerk requires a mode when a domain is created, so it is manual_invitation (the most restrictive) when unset. Left unset, the mode is unmanaged afterwards: refresh and import report Clerk's value in the state output and do not copy it into inputs.
         """
         return pulumi.get(self, "enrollment_mode")
 
@@ -104,7 +104,7 @@ class OrganizationDomain(pulumi.CustomResource):
 
         :param str resource_name: The name of the resource.
         :param pulumi.ResourceOptions opts: Options for the resource.
-        :param pulumi.Input[_builtins.str] enrollment_mode: Enrollment mode: manual_invitation, automatic_invitation or automatic_suggestion. Defaults to the instance setting when unset.
+        :param pulumi.Input[_builtins.str] enrollment_mode: Enrollment mode: manual_invitation, automatic_invitation, automatic_suggestion or enterprise_sso. Clerk requires a mode when a domain is created, so it is manual_invitation (the most restrictive) when unset. Left unset, the mode is unmanaged afterwards: refresh and import report Clerk's value in the state output and do not copy it into inputs.
         :param pulumi.Input[_builtins.str] name: The domain name, for example example.com. Changing this forces a new resource.
         :param pulumi.Input[_builtins.str] organization_id: ID of the organization. Changing this forces a new resource.
         :param pulumi.Input[_builtins.bool] verified: Whether the domain is verified. Set true to verify the domain on creation without an email check. Reports the domain's current verification state.
@@ -213,7 +213,7 @@ class OrganizationDomain(pulumi.CustomResource):
     @pulumi.getter(name="enrollmentMode")
     def enrollment_mode(self) -> pulumi.Output[Optional[_builtins.str]]:
         """
-        Enrollment mode: manual_invitation, automatic_invitation or automatic_suggestion. Defaults to the instance setting when unset.
+        Enrollment mode: manual_invitation, automatic_invitation, automatic_suggestion or enterprise_sso. Clerk requires a mode when a domain is created, so it is manual_invitation (the most restrictive) when unset. Left unset, the mode is unmanaged afterwards: refresh and import report Clerk's value in the state output and do not copy it into inputs.
         """
         return pulumi.get(self, "enrollment_mode")
 

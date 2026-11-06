@@ -30,7 +30,7 @@ type LookupInstanceConfigArgs struct {
 }
 
 type LookupInstanceConfigResult struct {
-	// The instance configuration as a JSON object with sorted keys.
+	// The instance configuration as a JSON object with sorted keys. It is a secret because instance configuration can contain provider client secrets.
 	Config string `pulumi:"config"`
 	// The version of the instance configuration.
 	ConfigVersion string `pulumi:"configVersion"`
@@ -72,7 +72,7 @@ func (o LookupInstanceConfigResultOutput) ToLookupInstanceConfigResultOutputWith
 	return o
 }
 
-// The instance configuration as a JSON object with sorted keys.
+// The instance configuration as a JSON object with sorted keys. It is a secret because instance configuration can contain provider client secrets.
 func (o LookupInstanceConfigResultOutput) Config() pulumi.StringOutput {
 	return o.ApplyT(func(v LookupInstanceConfigResult) string { return v.Config }).(pulumi.StringOutput)
 }

@@ -29,7 +29,7 @@ resources:
       name: Senior Engineer
       description: Senior engineers with merge and deploy access
       permissions:
-        - ${repos-write.key}
+        - ${repos-write.id}
   org-aware:
     type: clerk:JwtTemplate
     properties:

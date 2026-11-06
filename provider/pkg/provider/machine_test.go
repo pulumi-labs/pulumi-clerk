@@ -143,7 +143,10 @@ func TestMachine_Lifecycle(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "ci-bot-2", getStr(t, imp.Inputs, "name"))
 	require.Equal(t, machineSecret, imp.Properties.Get("secretKey").AsString())
-	d, err = s.Diff(pgp.DiffRequest{ID: created.ID, Urn: urn, State: imp.Properties, Inputs: imp.Inputs, OldInputs: imp.Inputs})
+	require.True(t, imp.Properties.Get("secretKey").Secret(), "an imported secretKey must be a secret, not plaintext in state (#1564)")
+	_, adopted := imp.Inputs.GetOk("defaultTokenTtl")
+	require.False(t, adopted, "import must not adopt the server default (#1563)")
+	d, err = s.Diff(pgp.DiffRequest{ID: created.ID, Urn: urn, State: imp.Properties, Inputs: pm(map[string]property.Value{"name": str("ci-bot-2")}), OldInputs: imp.Inputs})
 	require.NoError(t, err)
 	requireNoChanges(t, d)
 

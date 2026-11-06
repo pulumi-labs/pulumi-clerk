@@ -46,6 +46,10 @@ namespace Pulumi.Labs.Clerk
             {
                 Version = Utilities.Version,
                 PluginDownloadURL = "github://api.github.com/pulumi-labs/pulumi-clerk",
+                AdditionalSecretOutputs =
+                {
+                    "svixUrl",
+                },
             };
             var merged = CustomResourceOptions.Merge(defaultOptions, options);
             // Override the ID if one was specified for consistency with other language SDKs.

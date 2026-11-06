@@ -99,13 +99,18 @@ func TestApplicationSettings_Lifecycle(t *testing.T) {
 	// Read never changed the settings.
 	require.Equal(t, float64(7), orgSettings(f)["max_allowed_memberships"])
 
-	// Import by ID alone adopts what Clerk reports and then diffs clean.
+	// Import by ID alone adopts only required inputs: Clerk's defaults for the
+	// optional ones are in the current* outputs, so a program that leaves them
+	// out diffs clean (#1563).
 	imp, err := s.Read(pgp.ReadRequest{ID: "application_settings", Urn: urn})
 	require.NoError(t, err)
 	require.Equal(t, "application_settings", imp.ID)
 	require.Equal(t, true, imp.Inputs.Get("enableOrganizations").AsBool())
-	require.Equal(t, float64(7), imp.Inputs.Get("maxAllowedMemberships").AsNumber())
-	d, err = s.Diff(pgp.DiffRequest{ID: imp.ID, Urn: urn, State: imp.Properties, Inputs: imp.Inputs, OldInputs: imp.Inputs})
+	_, adopted := imp.Inputs.GetOk("maxAllowedMemberships")
+	require.False(t, adopted, "an import must not adopt a server-defaulted optional input")
+	require.Equal(t, float64(7), imp.Properties.Get("currentMaxAllowedMemberships").AsNumber())
+	program := pm(map[string]property.Value{"enableOrganizations": boolean(true)})
+	d, err = s.Diff(pgp.DiffRequest{ID: imp.ID, Urn: urn, State: imp.Properties, Inputs: program, OldInputs: imp.Inputs})
 	require.NoError(t, err)
 	requireNoChanges(t, d)
 

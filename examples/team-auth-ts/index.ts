@@ -23,7 +23,7 @@ const seniorEngineerRole = new clerk.OrganizationRole("senior-engineer", {
     key: "org:senior-engineer",
     name: "Senior Engineer",
     description: "Senior engineers with merge and deploy access",
-    permissions: [reposWritePermission.key],
+    permissions: [reposWritePermission.id],
 });
 
 // Org-aware JWT template -- embeds org context in tokens.

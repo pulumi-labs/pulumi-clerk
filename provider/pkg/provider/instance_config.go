@@ -277,7 +277,7 @@ type GetInstanceConfigArgs struct {
 // GetInstanceConfigResult is the instance configuration.
 type GetInstanceConfigResult struct {
 	ID            string `pulumi:"instanceConfigId"`
-	Config        string `pulumi:"config"`
+	Config        string `pulumi:"config" provider:"secret"`
 	ConfigVersion string `pulumi:"configVersion"`
 }
 
@@ -292,7 +292,7 @@ func (a *GetInstanceConfigArgs) Annotate(ann infer.Annotator) {
 
 func (r *GetInstanceConfigResult) Annotate(ann infer.Annotator) {
 	ann.Describe(&r.ID, "The ID in the form <applicationId>/<instanceId>.")
-	ann.Describe(&r.Config, "The instance configuration as a JSON object with sorted keys.")
+	ann.Describe(&r.Config, "The instance configuration as a JSON object with sorted keys. It is a secret because instance configuration can contain provider client secrets.")
 	ann.Describe(&r.ConfigVersion, "The version of the instance configuration.")
 }
 

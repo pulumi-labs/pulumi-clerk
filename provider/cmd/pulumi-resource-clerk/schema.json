@@ -304,8 +304,7 @@
         },
         "identifier": {
           "type": "string",
-          "description": "The email address, phone number or web3 wallet to allow, for example an email address, a phone number, a web3 wallet or an email wildcard like *@example.com. Changing this forces a new resource.",
-          "replaceOnChanges": true
+          "description": "The email address, phone number or web3 wallet to allow, for example an email address, a phone number, a web3 wallet or an email wildcard like *@example.com. Changing this forces a new resource."
         },
         "identifierType": {
           "type": "string",
@@ -313,8 +312,7 @@
         },
         "notify": {
           "type": "boolean",
-          "description": "Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program. Changing this forces a new resource.",
-          "replaceOnChanges": true
+          "description": "Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program: an entry that was imported, or that was created without it, has no recorded value, and setting it then changes nothing. Changing a recorded value forces a new resource (the old entry is deleted first). Removing the property after a value was recorded changes nothing."
         },
         "updatedAt": {
           "type": "string",
@@ -330,13 +328,11 @@
       "inputProperties": {
         "identifier": {
           "type": "string",
-          "description": "The email address, phone number or web3 wallet to allow, for example an email address, a phone number, a web3 wallet or an email wildcard like *@example.com. Changing this forces a new resource.",
-          "replaceOnChanges": true
+          "description": "The email address, phone number or web3 wallet to allow, for example an email address, a phone number, a web3 wallet or an email wildcard like *@example.com. Changing this forces a new resource."
         },
         "notify": {
           "type": "boolean",
-          "description": "Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program. Changing this forces a new resource.",
-          "replaceOnChanges": true
+          "description": "Whether to send an invitation email to the identifier when the entry is created. Only applies to email addresses. Clerk does not report this back, so it is only tracked from the program: an entry that was imported, or that was created without it, has no recorded value, and setting it then changes nothing. Changing a recorded value forces a new resource (the old entry is deleted first). Removing the property after a value was recorded changes nothing."
         }
       },
       "requiredInputs": [
@@ -1241,7 +1237,7 @@
         },
         "enrollmentMode": {
           "type": "string",
-          "description": "Enrollment mode: manual_invitation, automatic_invitation or automatic_suggestion. Defaults to the instance setting when unset."
+          "description": "Enrollment mode: manual_invitation, automatic_invitation, automatic_suggestion or enterprise_sso. Clerk requires a mode when a domain is created, so it is manual_invitation (the most restrictive) when unset. Left unset, the mode is unmanaged afterwards: refresh and import report Clerk's value in the state output and do not copy it into inputs."
         },
         "name": {
           "type": "string",
@@ -1277,7 +1273,7 @@
       "inputProperties": {
         "enrollmentMode": {
           "type": "string",
-          "description": "Enrollment mode: manual_invitation, automatic_invitation or automatic_suggestion. Defaults to the instance setting when unset."
+          "description": "Enrollment mode: manual_invitation, automatic_invitation, automatic_suggestion or enterprise_sso. Clerk requires a mode when a domain is created, so it is manual_invitation (the most restrictive) when unset. Left unset, the mode is unmanaged afterwards: refresh and import report Clerk's value in the state output and do not copy it into inputs."
         },
         "name": {
           "type": "string",
@@ -1799,7 +1795,8 @@
       "properties": {
         "svixUrl": {
           "type": "string",
-          "description": "A fresh, short-lived URL of the Svix dashboard for managing webhook endpoints. Refreshing the resource generates a new one."
+          "description": "A fresh, short-lived URL of the Svix dashboard for managing webhook endpoints. Refreshing the resource generates a new one.",
+          "secret": true
         }
       },
       "required": [
@@ -2151,7 +2148,8 @@
       "outputs": {
         "properties": {
           "config": {
-            "description": "The instance configuration as a JSON object with sorted keys.",
+            "description": "The instance configuration as a JSON object with sorted keys. It is a secret because instance configuration can contain provider client secrets.",
+            "secret": true,
             "type": "string"
           },
           "configVersion": {
@@ -2478,11 +2476,11 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "The domain name. Set either id or name."
+            "description": "The domain name. Set either organizationDomainId or name."
           },
           "organizationDomainId": {
             "type": "string",
-            "description": "The domain ID. Set either id or name."
+            "description": "The domain ID: the bare Clerk ID, or the OrganizationDomain resource id ('<organizationId>/<domainId>'). Set either organizationDomainId or name."
           },
           "organizationId": {
             "type": "string",
@@ -2925,6 +2923,7 @@
       "outputs": {
         "properties": {
           "svixUrl": {
+            "secret": true,
             "type": "string"
           },
           "svixWebhookId": {

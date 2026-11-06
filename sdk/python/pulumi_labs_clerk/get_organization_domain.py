@@ -123,8 +123,8 @@ def get_organization_domain(name: Optional[_builtins.str] = None,
     Look up a domain of a Clerk organization by domain ID or by name.
 
 
-    :param _builtins.str name: The domain name. Set either id or name.
-    :param _builtins.str organization_domain_id: The domain ID. Set either id or name.
+    :param _builtins.str name: The domain name. Set either organizationDomainId or name.
+    :param _builtins.str organization_domain_id: The domain ID: the bare Clerk ID, or the OrganizationDomain resource id ('<organizationId>/<domainId>'). Set either organizationDomainId or name.
     :param _builtins.str organization_id: ID of the organization that owns the domain.
     """
     __args__ = dict()
@@ -152,8 +152,8 @@ def get_organization_domain_output(name: Optional[pulumi.Input[Optional[_builtin
     Look up a domain of a Clerk organization by domain ID or by name.
 
 
-    :param _builtins.str name: The domain name. Set either id or name.
-    :param _builtins.str organization_domain_id: The domain ID. Set either id or name.
+    :param _builtins.str name: The domain name. Set either organizationDomainId or name.
+    :param _builtins.str organization_domain_id: The domain ID: the bare Clerk ID, or the OrganizationDomain resource id ('<organizationId>/<domainId>'). Set either organizationDomainId or name.
     :param _builtins.str organization_id: ID of the organization that owns the domain.
     """
     __args__ = dict()

@@ -35,13 +35,13 @@ namespace Pulumi.Labs.Clerk
     public sealed class GetOrganizationDomainArgs : global::Pulumi.InvokeArgs
     {
         /// <summary>
-        /// The domain name. Set either id or name.
+        /// The domain name. Set either organizationDomainId or name.
         /// </summary>
         [Input("name")]
         public string? Name { get; set; }
 
         /// <summary>
-        /// The domain ID. Set either id or name.
+        /// The domain ID: the bare Clerk ID, or the OrganizationDomain resource id ('&lt;organizationId&gt;/&lt;domainId&gt;'). Set either organizationDomainId or name.
         /// </summary>
         [Input("organizationDomainId")]
         public string? OrganizationDomainId { get; set; }
@@ -61,13 +61,13 @@ namespace Pulumi.Labs.Clerk
     public sealed class GetOrganizationDomainInvokeArgs : global::Pulumi.InvokeArgs
     {
         /// <summary>
-        /// The domain name. Set either id or name.
+        /// The domain name. Set either organizationDomainId or name.
         /// </summary>
         [Input("name")]
         public Input<string>? Name { get; set; }
 
         /// <summary>
-        /// The domain ID. Set either id or name.
+        /// The domain ID: the bare Clerk ID, or the OrganizationDomain resource id ('&lt;organizationId&gt;/&lt;domainId&gt;'). Set either organizationDomainId or name.
         /// </summary>
         [Input("organizationDomainId")]
         public Input<string>? OrganizationDomainId { get; set; }

@@ -77,7 +77,7 @@ namespace Pulumi.Labs.Clerk
     public sealed class GetInstanceConfigResult
     {
         /// <summary>
-        /// The instance configuration as a JSON object with sorted keys.
+        /// The instance configuration as a JSON object with sorted keys. It is a secret because instance configuration can contain provider client secrets.
         /// </summary>
         public readonly string Config;
         /// <summary>
