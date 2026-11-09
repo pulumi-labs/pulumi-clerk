@@ -120,9 +120,13 @@ func TestApplicationSettings_Lifecycle(t *testing.T) {
 	require.Equal(t, true, out.Get("enableOrganizations").AsBool())
 	require.Equal(t, "org:admin", getStr(t, out, "creatorRole"))
 
-	// Delete disables organizations (as the Terraform provider did).
+	// Delete stops managing the settings and leaves the instance alone: it must not disable
+	// Organizations for every user of the instance (#1683).
+	patches := f.callCount("PATCH /instance/organization_settings")
 	require.NoError(t, s.Delete(pgp.DeleteRequest{ID: created.ID, Urn: urn, Properties: upd.Properties}))
-	require.Equal(t, false, orgSettings(f)["enabled"])
+	require.Equal(t, patches, f.callCount("PATCH /instance/organization_settings"), "delete sends nothing to Clerk")
+	require.Equal(t, true, orgSettings(f)["enabled"], "organizations stay enabled after delete")
+	require.Equal(t, float64(7), orgSettings(f)["max_allowed_memberships"])
 }
 
 func TestApplicationSettings_NeedsBackendKey(t *testing.T) {

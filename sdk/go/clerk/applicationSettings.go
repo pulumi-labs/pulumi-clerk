@@ -12,7 +12,7 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-// The organization feature settings of a Clerk instance (the instance behind the clerk:apiKey). This is a singleton: only one can exist per instance, and its ID is always application_settings. The Backend API has no read endpoint for these settings, so refresh and import read the current values by sending an empty update. Optional inputs left unset are not managed: Clerk keeps its current value, which is shown in the matching current* output. Deleting the resource disables organizations on the instance, as the Terraform provider did. Import with the ID application_settings.
+// The organization feature settings of a Clerk instance (the instance behind the clerk:apiKey). This is a singleton: only one can exist per instance, and its ID is always application_settings. The Backend API has no read endpoint for these settings, so refresh and import read the current values by sending an empty update. Optional inputs left unset are not managed: Clerk keeps its current value, which is shown in the matching current* output. Deleting the resource only stops managing the settings: the instance keeps its current values, including whether organizations are enabled, because disabling Organizations would affect every user of the instance and Clerk keeps no prior value to restore. Import with the ID application_settings.
 type ApplicationSettings struct {
 	pulumi.CustomResourceState
 
