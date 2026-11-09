@@ -51,7 +51,7 @@ type ApplicationSettingsState struct {
 }
 
 func (r *ApplicationSettings) Annotate(a infer.Annotator) {
-	a.Describe(&r, "The organization feature settings of a Clerk instance (the instance behind the clerk:apiKey). This is a singleton: only one can exist per instance, and its ID is always application_settings. The Backend API has no read endpoint for these settings, so refresh and import read the current values by sending an empty update. Optional inputs left unset are not managed: Clerk keeps its current value, which is shown in the matching current* output. Deleting the resource disables organizations on the instance, as the Terraform provider did. Import with the ID application_settings.")
+	a.Describe(&r, "The organization feature settings of a Clerk instance (the instance behind the clerk:apiKey). This is a singleton: only one can exist per instance, and its ID is always application_settings. The Backend API has no read endpoint for these settings, so refresh and import read the current values by sending an empty update. Optional inputs left unset are not managed: Clerk keeps its current value, which is shown in the matching current* output. Deleting the resource only stops managing the settings: the instance keeps its current values, including whether organizations are enabled, because disabling Organizations would affect every user of the instance and Clerk keeps no prior value to restore. Import with the ID application_settings.")
 }
 
 func (a *ApplicationSettingsArgs) Annotate(ann infer.Annotator) {
@@ -196,14 +196,11 @@ func (r *ApplicationSettings) Read(ctx context.Context, req infer.ReadRequest[Ap
 	return infer.ReadResponse[ApplicationSettingsArgs, ApplicationSettingsState]{ID: applicationSettingsID, Inputs: st.ApplicationSettingsArgs, State: st}, nil
 }
 
-func (r *ApplicationSettings) Delete(ctx context.Context, req infer.DeleteRequest[ApplicationSettingsState]) (infer.DeleteResponse, error) {
-	c, err := backendClient(ctx)
-	if err != nil {
-		return infer.DeleteResponse{}, err
-	}
-	if _, err := patchApplicationSettings(ctx, c, map[string]any{"enabled": false}); err != nil && !isNotFound(err) {
-		return infer.DeleteResponse{}, fmt.Errorf("clerk: disable organizations: %w", err)
-	}
+// Delete only removes the resource from state. The settings are a singleton the instance always has, and
+// turning Organizations off would affect every user of a shared instance with no way to restore the prior
+// value (Clerk keeps none), so the instance is left exactly as it is (#1683). The Terraform provider disabled
+// Organizations here; this provider deliberately does not.
+func (r *ApplicationSettings) Delete(_ context.Context, _ infer.DeleteRequest[ApplicationSettingsState]) (infer.DeleteResponse, error) {
 	return infer.DeleteResponse{}, nil
 }
 
