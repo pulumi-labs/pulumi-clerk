@@ -1,5 +1,0 @@
-# Provider configuration: this example uses the default provider. Set clerk:apiKey (secret) with
-# `pulumi config set [--secret] <key> <value>`, or export CLERK_API_KEY.
-name: jwt-templates-ts
-description: "Two JWT templates for access and id tokens (TypeScript)"
-runtime: nodejs
