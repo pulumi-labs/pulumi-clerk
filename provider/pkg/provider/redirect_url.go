@@ -123,6 +123,9 @@ func (r *RedirectUrl) Read(ctx context.Context, req infer.ReadRequest[RedirectUr
 		return empty, fmt.Errorf("clerk: read redirect URL %q: %w", req.ID, err)
 	}
 	if got == nil {
+		if err := notFoundOnImport("redirect url", req.ID, req.Inputs, req.State); err != nil {
+			return empty, err
+		}
 		return empty, nil
 	}
 	st := got.state()

@@ -198,6 +198,9 @@ func (r *InstanceDomain) Read(ctx context.Context, req infer.ReadRequest[Instanc
 		return empty, fmt.Errorf("clerk: read instance domain %q: %w", req.ID, err)
 	}
 	if got == nil {
+		if err := notFoundOnImport("instance domain", req.ID, req.Inputs, req.State); err != nil {
+			return empty, err
+		}
 		return empty, nil
 	}
 	prior := req.Inputs

@@ -230,6 +230,9 @@ func (r *JwtTemplate) Read(ctx context.Context, req infer.ReadRequest[JwtTemplat
 		return empty, fmt.Errorf("clerk: read JWT template %q: %w", req.ID, err)
 	}
 	if got == nil {
+		if err := notFoundOnImport("jwt template", req.ID, req.Inputs, req.State); err != nil {
+			return empty, err
+		}
 		return empty, nil
 	}
 	in := req.Inputs

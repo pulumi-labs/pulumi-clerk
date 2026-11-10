@@ -113,6 +113,9 @@ func (r *OrganizationPermission) Read(ctx context.Context, req infer.ReadRequest
 	var j organizationPermissionJSON
 	if err := c.do(ctx, http.MethodGet, "/organization_permissions/"+esc(req.ID), nil, &j); err != nil {
 		if isNotFound(err) {
+			if err := notFoundOnImport("organization permission", req.ID, req.Inputs, req.State); err != nil {
+				return empty, err
+			}
 			return empty, nil
 		}
 		return empty, fmt.Errorf("clerk: read organization permission %q: %w", req.ID, err)

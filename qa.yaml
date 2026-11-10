@@ -139,6 +139,7 @@ functions:
   - name: getSvixWebhook
     test: true
 regressions:
+  - "#1715 pulumi import of an ID that does not exist (for example clerk:index:Organization o org_nope, JwtTemplate, Machine, RedirectUrl) fails with 'does not exist' and leaves nothing in state; a refresh of a resource deleted outside Pulumi still drops it from state"
   - "#1683 destroying ApplicationSettings leaves the instance as it was: getApplicationSettings after pulumi destroy reports the same enableOrganizations and limits as before the stack was applied (organizations are not disabled)"
   - "#1565 OrganizationDomain created with only organizationId and name succeeds (enrollmentMode defaults to manual_invitation; the API requires it and answers 422 without it)"
   - "#1566 getOrganizationDomain accepts the OrganizationDomain resource id (organizationId/domainId) as organizationDomainId, and the bare domain id"

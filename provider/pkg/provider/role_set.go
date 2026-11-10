@@ -201,6 +201,9 @@ func (r *RoleSet) Read(ctx context.Context, req infer.ReadRequest[RoleSetArgs, R
 	var j roleSetJSON
 	if err := c.do(ctx, http.MethodGet, "/role_sets/"+esc(req.ID), nil, &j); err != nil {
 		if isNotFound(err) {
+			if err := notFoundOnImport("role set", req.ID, req.Inputs, req.State); err != nil {
+				return empty, err
+			}
 			return empty, nil
 		}
 		return empty, fmt.Errorf("clerk: read role set %q: %w", req.ID, err)

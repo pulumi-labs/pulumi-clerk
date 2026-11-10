@@ -141,6 +141,9 @@ func (r *OrganizationMembership) Read(ctx context.Context, req infer.ReadRequest
 		return empty, fmt.Errorf("clerk: read organization membership %q: %w", req.ID, err)
 	}
 	if got == nil {
+		if err := notFoundOnImport("organization membership", req.ID, req.Inputs, req.State); err != nil {
+			return empty, err
+		}
 		return empty, nil
 	}
 	st := got.state(orgID, userID)

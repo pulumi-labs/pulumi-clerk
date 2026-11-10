@@ -149,6 +149,9 @@ func (r *AllowlistIdentifier) Read(ctx context.Context, req infer.ReadRequest[Al
 		return empty, fmt.Errorf("clerk: read allowlist identifier %q: %w", req.ID, err)
 	}
 	if got == nil {
+		if err := notFoundOnImport("allowlist identifier", req.ID, req.Inputs, req.State); err != nil {
+			return empty, err
+		}
 		return empty, nil
 	}
 	st := got.state()
