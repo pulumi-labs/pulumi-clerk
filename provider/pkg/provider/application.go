@@ -263,6 +263,9 @@ func (r *Application) Read(ctx context.Context, req infer.ReadRequest[Applicatio
 	}
 	got, err := getApplicationJSON(ctx, c, req.ID)
 	if isNotFound(err) {
+		if err := notFoundOnImport("application", req.ID, req.Inputs, req.State); err != nil {
+			return empty, err
+		}
 		return empty, nil
 	}
 	if err != nil {

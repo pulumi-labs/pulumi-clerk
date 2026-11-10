@@ -257,6 +257,9 @@ func (r *ApiKey) Read(ctx context.Context, req infer.ReadRequest[ApiKeyArgs, Api
 		return empty, fmt.Errorf("clerk: read API key %q: %w", req.ID, err)
 	}
 	if got == nil {
+		if err := notFoundOnImport("api key", req.ID, req.Inputs, req.State); err != nil {
+			return empty, err
+		}
 		return empty, nil
 	}
 	in := req.Inputs

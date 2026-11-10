@@ -200,6 +200,9 @@ func (r *OrganizationDomain) Read(ctx context.Context, req infer.ReadRequest[Org
 		return empty, fmt.Errorf("clerk: read organization domain %q: %w", req.ID, err)
 	}
 	if got == nil {
+		if err := notFoundOnImport("organization domain", req.ID, req.Inputs, req.State); err != nil {
+			return empty, err
+		}
 		return empty, nil
 	}
 	imported := req.Inputs.Name == "" && req.State.Name == ""

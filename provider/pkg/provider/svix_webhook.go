@@ -97,6 +97,9 @@ func (r *SvixWebhook) Read(ctx context.Context, req infer.ReadRequest[SvixWebhoo
 	out, err := refreshSvixURL(ctx, c)
 	if err != nil {
 		if isNotFound(err) {
+			if err := notFoundOnImport("svix webhook", req.ID, req.Inputs, req.State); err != nil {
+				return empty, err
+			}
 			return empty, nil
 		}
 		return empty, fmt.Errorf("clerk: read Svix webhook integration: %w", err)

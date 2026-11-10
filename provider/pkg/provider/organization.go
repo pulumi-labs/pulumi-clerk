@@ -253,6 +253,9 @@ func (r *Organization) Read(ctx context.Context, req infer.ReadRequest[Organizat
 	var j organizationJSON
 	if err := c.do(ctx, http.MethodGet, "/organizations/"+esc(req.ID), nil, &j); err != nil {
 		if isNotFound(err) {
+			if err := notFoundOnImport("organization", req.ID, req.Inputs, req.State); err != nil {
+				return empty, err
+			}
 			return empty, nil
 		}
 		return empty, fmt.Errorf("clerk: read organization %q: %w", req.ID, err)

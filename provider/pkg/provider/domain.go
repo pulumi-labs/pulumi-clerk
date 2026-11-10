@@ -149,6 +149,9 @@ func (r *Domain) Read(ctx context.Context, req infer.ReadRequest[DomainArgs, Dom
 	}
 	got, err := getDomainJSON(ctx, c, appID, domainID)
 	if isNotFound(err) {
+		if err := notFoundOnImport("domain", req.ID, req.Inputs, req.State); err != nil {
+			return empty, err
+		}
 		return empty, nil
 	}
 	if err != nil {

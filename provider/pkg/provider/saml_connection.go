@@ -369,6 +369,9 @@ func (r *SamlConnection) Read(ctx context.Context, req infer.ReadRequest[SamlCon
 	var out samlConnectionJSON
 	if err := c.do(ctx, http.MethodGet, "/saml_connections/"+req.ID, nil, &out); err != nil {
 		if isNotFound(err) {
+			if err := notFoundOnImport("saml connection", req.ID, req.Inputs, req.State); err != nil {
+				return empty, err
+			}
 			return empty, nil
 		}
 		return empty, fmt.Errorf("clerk: read SAML connection %q: %w", req.ID, err)

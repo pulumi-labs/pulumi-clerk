@@ -233,6 +233,9 @@ func (r *InstanceConfig) Read(ctx context.Context, req infer.ReadRequest[Instanc
 	full, version, err := getInstanceConfigRaw(ctx, c, appID, instID)
 	if err != nil {
 		if isNotFound(err) {
+			if err := notFoundOnImport("instance config", req.ID, req.Inputs, req.State); err != nil {
+				return empty, err
+			}
 			return empty, nil
 		}
 		return empty, fmt.Errorf("clerk: read instance config %q: %w", req.ID, err)

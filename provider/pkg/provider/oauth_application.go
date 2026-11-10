@@ -213,6 +213,9 @@ func (r *OauthApplication) Read(ctx context.Context, req infer.ReadRequest[Oauth
 		return empty, fmt.Errorf("clerk: read OAuth application %q: %w", req.ID, err)
 	}
 	if got == nil {
+		if err := notFoundOnImport("oauth application", req.ID, req.Inputs, req.State); err != nil {
+			return empty, err
+		}
 		return empty, nil
 	}
 	in := req.Inputs
