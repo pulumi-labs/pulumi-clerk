@@ -139,6 +139,7 @@ functions:
   - name: getSvixWebhook
     test: true
 regressions:
+  - "#1801 pulumi import of a Machine with defaultTokenTtl 7200, a JwtTemplate with lifetime 120 and ApplicationSettings with domainsEnabled true and maxAllowedMemberships 7, then pulumi preview with a program declaring those values, plans no change; the same import of objects holding Clerk's defaults (3600, 60, 5, false) with a program that omits them also plans no change (#1563). Verify the constants against a real instance: Machine defaultTokenTtl 3600, JwtTemplate lifetime 60, allowedClockSkew 5, signingAlgorithm RS256, customSigningKey false, OauthApplication consentScreenEnabled false, ApplicationSettings maxAllowedMemberships 5, adminDeleteEnabled true, domainsEnabled false; a wrong constant silently reintroduces #1801 or #1563 for that field"
   - "#1715 pulumi import of an ID that does not exist (for example clerk:index:Organization o org_nope, JwtTemplate, Machine, RedirectUrl) fails with 'does not exist' and leaves nothing in state; a refresh of a resource deleted outside Pulumi still drops it from state"
   - "#1683 destroying ApplicationSettings leaves the instance as it was: getApplicationSettings after pulumi destroy reports the same enableOrganizations and limits as before the stack was applied (organizations are not disabled)"
   - "#1565 OrganizationDomain created with only organizationId and name succeeds (enrollmentMode defaults to manual_invitation; the API requires it and answers 422 without it)"

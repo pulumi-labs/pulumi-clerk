@@ -226,10 +226,14 @@ func (r *OauthApplication) Read(ctx context.Context, req infer.ReadRequest[Oauth
 	if imported || !scopesSatisfied(in.Scopes, got.Scopes) {
 		in.Scopes = got.Scopes
 	}
-	// Import adopts nothing optional: Clerk's default is in effectiveConsentScreenEnabled (#1563).
+	// An import adopts consentScreenEnabled only when it is not Clerk's default:
+	// the default stays in effectiveConsentScreenEnabled (#1563), a real value is
+	// adopted so a program declaring it plans no change (#1801).
 	if !imported && in.ConsentScreenEnabled != nil {
 		v := got.ConsentScreenEnabled
 		in.ConsentScreenEnabled = &v
+	} else if imported {
+		in.ConsentScreenEnabled = adoptIfNotDefault(got.ConsentScreenEnabled, clerkDefaultConsentScreenEnabled)
 	}
 	// The client secret is only ever returned at creation: keep it.
 	st := got.outputs(in, req.State.ClientSecret)

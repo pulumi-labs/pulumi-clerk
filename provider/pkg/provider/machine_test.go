@@ -144,9 +144,10 @@ func TestMachine_Lifecycle(t *testing.T) {
 	require.Equal(t, "ci-bot-2", getStr(t, imp.Inputs, "name"))
 	require.Equal(t, machineSecret, imp.Properties.Get("secretKey").AsString())
 	require.True(t, imp.Properties.Get("secretKey").Secret(), "an imported secretKey must be a secret, not plaintext in state (#1564)")
-	_, adopted := imp.Inputs.GetOk("defaultTokenTtl")
-	require.False(t, adopted, "import must not adopt the server default (#1563)")
-	d, err = s.Diff(pgp.DiffRequest{ID: created.ID, Urn: urn, State: imp.Properties, Inputs: pm(map[string]property.Value{"name": str("ci-bot-2")}), OldInputs: imp.Inputs})
+	// The live TTL (900) is not Clerk's default, so the import adopts it and the
+	// program that declares it diffs clean (#1801).
+	require.Equal(t, float64(900), imp.Inputs.Get("defaultTokenTtl").AsNumber(), "import must adopt a non-default value (#1801)")
+	d, err = s.Diff(pgp.DiffRequest{ID: created.ID, Urn: urn, State: imp.Properties, Inputs: pm(map[string]property.Value{"name": str("ci-bot-2"), "defaultTokenTtl": num(900)}), OldInputs: imp.Inputs})
 	require.NoError(t, err)
 	requireNoChanges(t, d)
 
