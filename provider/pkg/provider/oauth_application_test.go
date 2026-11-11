@@ -156,8 +156,8 @@ func TestOauthApplication_Lifecycle(t *testing.T) {
 	d, err = s.Diff(pgp.DiffRequest{ID: created.ID, Urn: urn, State: imp.Properties, Inputs: imp.Inputs, OldInputs: imp.Inputs})
 	require.NoError(t, err)
 	requireNoChanges(t, d)
-	_, adopted := imp.Inputs.GetOk("consentScreenEnabled")
-	require.False(t, adopted, "import must not adopt the server default (#1563)")
+	// The live consent screen is on (not Clerk's default of off), so it is adopted (#1801).
+	require.Equal(t, true, imp.Inputs.Get("consentScreenEnabled").AsBool(), "import must adopt a non-default consentScreenEnabled (#1801)")
 	// Reordered or partial scopes are not a change (Clerk reorders and adds
 	// implicit ones); a scope Clerk does not have is.
 	for _, scopes := range []string{"offline_access profile", "profile"} {

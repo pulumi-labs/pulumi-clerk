@@ -111,14 +111,16 @@ func TestJwtTemplate_Lifecycle(t *testing.T) {
 	imp, err := s.Read(pgp.ReadRequest{ID: created.ID, Urn: urn})
 	require.NoError(t, err)
 	require.Equal(t, "hasura", getStr(t, imp.Inputs, "name"))
-	// Optional inputs are not adopted: Clerk's defaults are in effective*
-	// outputs, so the program that left them out diffs clean (#1563).
-	for _, k := range []string{"lifetime", "allowedClockSkew", "customSigningKey", "signingAlgorithm"} {
+	// A non-default optional (lifetime 120) is adopted so the program that
+	// declares it diffs clean (#1801); optionals at Clerk's default stay unset
+	// (#1563).
+	require.Equal(t, float64(120), imp.Inputs.Get("lifetime").AsNumber(), "import must adopt a non-default lifetime (#1801)")
+	for _, k := range []string{"allowedClockSkew", "customSigningKey", "signingAlgorithm"} {
 		_, adopted := imp.Inputs.GetOk(k)
-		require.False(t, adopted, "import must not adopt %s", k)
+		require.False(t, adopted, "import must not adopt %s at its default", k)
 	}
 	require.Equal(t, float64(120), imp.Properties.Get("effectiveLifetime").AsNumber())
-	program := pm(map[string]property.Value{"name": str("hasura"), "claims": imp.Inputs.Get("claims")})
+	program := pm(map[string]property.Value{"name": str("hasura"), "claims": imp.Inputs.Get("claims"), "lifetime": num(120)})
 	d, err = s.Diff(pgp.DiffRequest{ID: created.ID, Urn: urn, State: imp.Properties, Inputs: program, OldInputs: imp.Inputs})
 	require.NoError(t, err)
 	requireNoChanges(t, d)

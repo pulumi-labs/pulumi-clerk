@@ -158,10 +158,14 @@ func (r *Machine) Read(ctx context.Context, req infer.ReadRequest[MachineArgs, M
 	in := req.Inputs
 	imported := in.Name == ""
 	in.Name = got.Name
-	// Import adopts nothing optional: Clerk's default is in effectiveDefaultTokenTtl (#1563).
+	// An import adopts an optional only when Clerk holds a non-default value: a
+	// default stays unset (it is in effectiveDefaultTokenTtl, #1563), a real
+	// value is adopted so a program that declares it plans no change (#1801).
 	if !imported && in.DefaultTokenTtl != nil {
 		v := got.DefaultTokenTTL
 		in.DefaultTokenTtl = &v
+	} else if imported {
+		in.DefaultTokenTtl = adoptIfNotDefault(got.DefaultTokenTTL, clerkDefaultMachineTokenTTL)
 	}
 	secret := req.State.SecretKey
 	if secret == "" {

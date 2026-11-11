@@ -4,6 +4,12 @@ All notable changes to the Clerk Pulumi provider are documented here.
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-11
+
+### Fixed
+
+- `pulumi import` of a `Machine`, `JwtTemplate`, `OauthApplication` or `ApplicationSettings` now adopts an optional input whose live value differs from Clerk's default (`Machine.defaultTokenTtl`, `JwtTemplate.lifetime`, `allowedClockSkew`, `signingAlgorithm`, `customSigningKey`, `OauthApplication.consentScreenEnabled`, `ApplicationSettings.maxAllowedMemberships`, `adminDeleteEnabled`, `domainsEnabled`), so a program that declares that value plans no change right after import. A value equal to Clerk's default is still left unset (the server default stays in the `effective*` / `current*` outputs), so the #1563 fix holds. Regression from that fix, which adopted no optional at all. Mirror issue https://github.com/pulumi-labs/pulumi-clerk/issues/15 (#1801).
+
 ## [0.1.1] - 2026-11-10
 
 ### Changed

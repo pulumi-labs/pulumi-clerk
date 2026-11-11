@@ -239,9 +239,16 @@ func (r *JwtTemplate) Read(ctx context.Context, req infer.ReadRequest[JwtTemplat
 	imported := in.Name == ""
 	in.Name, in.Claims = got.Name, got.claimsString()
 	// Optional inputs the program left unset stay unset; the server's value
-	// is in the effective* outputs. An import has no program yet, and Clerk
-	// fills in defaults for these (#1563), so none are adopted: a program that
-	// declares one later sees an in-place update at most.
+	// is in the effective* outputs. On import, an optional whose live value
+	// equals Clerk's default is left unset (#1563), so a program that omits it
+	// plans no change; one whose live value differs is adopted, so a program
+	// that declares that value plans no change either (#1801).
+	if imported {
+		in.Lifetime = adoptIfNotDefault(got.Lifetime, clerkDefaultJwtLifetime)
+		in.AllowedClockSkew = adoptIfNotDefault(got.AllowedClockSkew, clerkDefaultJwtClockSkew)
+		in.SigningAlgorithm = adoptIfNotDefault(got.SigningAlgorithm, clerkDefaultJwtSigningAlgorithm)
+		in.CustomSigningKey = adoptIfNotDefault(got.CustomSigningKey, clerkDefaultJwtCustomSigningKey)
+	}
 	if !imported && in.Lifetime != nil {
 		v := got.Lifetime
 		in.Lifetime = &v
