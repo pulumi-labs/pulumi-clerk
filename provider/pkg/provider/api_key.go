@@ -198,7 +198,7 @@ func (r *ApiKey) Check(ctx context.Context, req infer.CheckRequest) (infer.Check
 			args.Claims = &canon
 		}
 	}
-	return infer.CheckResponse[ApiKeyArgs]{Inputs: args, Failures: failures}, nil
+	return infer.CheckResponse[ApiKeyArgs]{Inputs: args, Failures: dropUnknownFailures(failures, req.NewInputs)}, nil
 }
 
 func getApiKey(ctx context.Context, c *client, id string) (*apiKeyJSON, error) {

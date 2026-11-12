@@ -190,7 +190,7 @@ func (r *JwtTemplate) Check(ctx context.Context, req infer.CheckRequest) (infer.
 	} else {
 		args.Claims = canon
 	}
-	return infer.CheckResponse[JwtTemplateArgs]{Inputs: args, Failures: failures}, nil
+	return infer.CheckResponse[JwtTemplateArgs]{Inputs: args, Failures: dropUnknownFailures(failures, req.NewInputs)}, nil
 }
 
 func getJwtTemplate(ctx context.Context, c *client, id string) (*jwtTemplateJSON, error) {
