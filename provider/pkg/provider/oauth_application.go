@@ -196,7 +196,7 @@ func (r *OauthApplication) Diff(_ context.Context, req infer.DiffRequest[OauthAp
 	if in.Public != st.Public {
 		diff["public"] = pgp.PropertyDiff{Kind: pgp.UpdateReplace, InputDiff: true}
 	}
-	if in.ConsentScreenEnabled != nil && (st.ConsentScreenEnabled == nil || *in.ConsentScreenEnabled != *st.ConsentScreenEnabled) {
+	if in.ConsentScreenEnabled != nil && *in.ConsentScreenEnabled != st.EffectiveConsentScreenEnabled {
 		diff["consentScreenEnabled"] = pgp.PropertyDiff{Kind: pgp.Update, InputDiff: true}
 	}
 	return infer.DiffResponse{HasChanges: len(diff) > 0, DetailedDiff: diff}, nil

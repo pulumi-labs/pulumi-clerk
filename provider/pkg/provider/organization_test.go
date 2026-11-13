@@ -15,6 +15,7 @@
 package provider
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strings"
@@ -48,12 +49,56 @@ func init() {
 				return nil
 			},
 			OnUpdate: func(o fakeObj, body map[string]any) error {
+				for _, k := range []string{"public_metadata", "private_metadata"} {
+					if _, ok := body[k]; ok {
+						return errDeprecatedParam
+					}
+				}
 				if _, ok := body["admin_delete_enabled"]; ok && o.str("name") == "failpatch" {
 					return errors.New("cannot change admin_delete_enabled")
 				}
 				return nil
 			},
 		})
+		// Metadata moved to its own endpoint: PATCH merges (null removes a key),
+		// PUT replaces each supplied field.
+		metadata := func(replace bool) http.HandlerFunc {
+			return func(w http.ResponseWriter, r *http.Request) {
+				body := readBody(r)
+				f.mu.Lock()
+				defer f.mu.Unlock()
+				o, ok := orgs.Objs[r.PathValue("id")]
+				if !ok {
+					notFound(w, "organization")
+					return
+				}
+				for _, k := range []string{"public_metadata", "private_metadata"} {
+					v, ok := body[k].(map[string]any)
+					if !ok {
+						continue
+					}
+					if replace {
+						o[k] = v
+						continue
+					}
+					cur, _ := o[k].(map[string]any)
+					if cur == nil {
+						cur = map[string]any{}
+					}
+					for mk, mv := range v {
+						if mv == nil {
+							delete(cur, mk)
+						} else {
+							cur[mk] = mv
+						}
+					}
+					o[k] = cur
+				}
+				writeJSON(w, http.StatusOK, o)
+			}
+		}
+		f.mux.HandleFunc("PUT /organizations/{id}/metadata", metadata(true))
+		f.mux.HandleFunc("PATCH /organizations/{id}/metadata", metadata(false))
 		// Clerk resolves an organization by ID or by slug in the same path position.
 		f.mux.HandleFunc("GET /organizations/{idOrSlug}", func(w http.ResponseWriter, r *http.Request) {
 			f.mu.Lock()
@@ -126,6 +171,36 @@ func TestOrganization_Lifecycle(t *testing.T) {
 	require.Equal(t, 25.0, upd.Properties.Get("maxAllowedMemberships").AsNumber())
 	requireNoChanges(t, diff(upd.Properties, newIn, newIn))
 
+	// Metadata changes go through the /metadata endpoint, never PATCH (#1891).
+	// A name-only change with metadata set sends no metadata at all.
+	puts := f.callCount("PUT /organizations")
+	renamed := newIn.Set("name", str("Acme Ltd"))
+	nameOnly, err := s.Update(pgp.UpdateRequest{ID: created.ID, Urn: urn, State: upd.Properties, OldInputs: newIn, Inputs: renamed})
+	require.NoError(t, err)
+	require.Equal(t, "Acme Ltd", getStr(t, nameOnly.Properties, "name"))
+	require.Equal(t, puts, f.callCount("PUT /organizations"), "an unchanged metadata field must not be sent")
+	// A changed value; a key removed from the object disappears (replace, not merge).
+	changed := renamed.Set("publicMetadata", str(`{"b": 2}`))
+	valueChanged, err := s.Update(pgp.UpdateRequest{ID: created.ID, Urn: urn, State: nameOnly.Properties, OldInputs: renamed, Inputs: changed})
+	require.NoError(t, err)
+	require.Equal(t, puts+1, f.callCount("PUT /organizations"), "only the changed field is sent")
+	require.JSONEq(t, `{"b":2}`, string(mustJSON(t, f.collections["/organizations"].Objs[created.ID]["public_metadata"])))
+	require.JSONEq(t, `{"token":"t"}`, string(mustJSON(t, f.collections["/organizations"].Objs[created.ID]["private_metadata"])))
+	require.Equal(t, `{"b": 2}`, getStr(t, valueChanged.Properties, "publicMetadata"))
+	requireNoChanges(t, diff(valueChanged.Properties, changed, changed))
+	// Both fields at once, together with a rename.
+	both := changed.Set("name", str("Acme Inc")).Set("privateMetadata", str(`{"token":"u"}`).WithSecret(true))
+	bothUpd, err := s.Update(pgp.UpdateRequest{ID: created.ID, Urn: urn, State: valueChanged.Properties, OldInputs: changed, Inputs: both})
+	require.NoError(t, err)
+	require.Equal(t, puts+2, f.callCount("PUT /organizations"), "only the changed private field is sent with the rename")
+	require.JSONEq(t, `{"token":"u"}`, string(mustJSON(t, f.collections["/organizations"].Objs[created.ID]["private_metadata"])))
+	// Back to the original program: nested keys return, and the stored state
+	// keeps the user's own text.
+	upd, err = s.Update(pgp.UpdateRequest{ID: created.ID, Urn: urn, State: bothUpd.Properties, OldInputs: both, Inputs: newIn})
+	require.NoError(t, err)
+	require.JSONEq(t, `{"b":1,"a":{"y":2,"x":1}}`, string(mustJSON(t, f.collections["/organizations"].Objs[created.ID]["public_metadata"])))
+	require.JSONEq(t, `{"token":"t"}`, string(mustJSON(t, f.collections["/organizations"].Objs[created.ID]["private_metadata"])))
+
 	// Refresh by ID keeps unset inputs unset and set ones in step with Clerk.
 	f.collections["/organizations"].Objs[created.ID]["name"] = "Renamed Elsewhere"
 	read, err := s.Read(pgp.ReadRequest{ID: created.ID, Urn: urn, Properties: upd.Properties, Inputs: newIn})
@@ -192,4 +267,12 @@ func TestOrganization_PostCreateFailureKeepsID(t *testing.T) {
 	require.Error(t, err)
 	require.NotEmpty(t, created.ID, "the created organization's ID must be returned with the error")
 	require.Len(t, f.collections["/organizations"].Objs, 1)
+}
+
+// mustJSON marshals a fake-server value for JSONEq comparisons.
+func mustJSON(t *testing.T, v any) []byte {
+	t.Helper()
+	b, err := json.Marshal(v)
+	require.NoError(t, err)
+	return b
 }

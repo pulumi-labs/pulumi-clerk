@@ -4,6 +4,13 @@ All notable changes to the Clerk Pulumi provider are documented here.
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-11-13
+
+### Fixed
+
+- Updating an `Organization` no longer fails with HTTP 422 `form_param_deprecated`. Clerk now rejects `public_metadata` and `private_metadata` on `PATCH /v1/organizations/{id}`, so every update of an organization whose program set `publicMetadata` or `privateMetadata` failed, including a plain rename. Update now leaves metadata out of that PATCH and sends each metadata field that changed to `PUT /v1/organizations/{id}/metadata`, which replaces the field, so a key removed from the program is removed in Clerk; a field that did not change is not sent. Create is unchanged (it still accepts metadata). No other resource sends `public_metadata` or `private_metadata`. Mirror issue https://github.com/pulumi-labs/pulumi-clerk/issues/20 (#1891).
+- `OauthApplication.consentScreenEnabled`: Clerk's default is `true` (Backend API spec: `consent_screen_enabled` default `true` on `POST /oauth_applications`; confirmed by a live create without the field), but the provider assumed `false`. `pulumi import` of an application with Clerk's default consent screen (on) adopted `consentScreenEnabled: true`, so a program that omitted the field planned a change, while an application with the screen off was treated as the default and not adopted. The default constant is now `true`, import adopts the field only when the screen is off, and Diff compares a declared value with `effectiveConsentScreenEnabled`, so writing the default explicitly after import plans no change. Mirror issue https://github.com/pulumi-labs/pulumi-clerk/issues/18 (#1890).
+
 ## [0.1.3] - 2026-11-12
 
 ### Fixed
