@@ -27,7 +27,7 @@ const (
 	clerkDefaultJwtSigningAlgorithm   = "RS256"
 	clerkDefaultMaxAllowedMemberships = 5
 	clerkDefaultAdminDeleteEnabled    = true
-	clerkDefaultConsentScreenEnabled  = false
+	clerkDefaultConsentScreenEnabled  = true
 	clerkDefaultDomainsEnabled        = false
 )
 

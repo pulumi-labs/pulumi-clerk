@@ -34,7 +34,7 @@ func init() {
 			o["token_fetch_url"] = "https://clerk.example.com/oauth/token"
 			o["user_info_url"] = "https://clerk.example.com/oauth/userinfo"
 			if _, ok := o["consent_screen_enabled"]; !ok {
-				o["consent_screen_enabled"] = false
+				o["consent_screen_enabled"] = true // Clerk defaults to true (Backend API spec, #1890)
 			}
 			// Clerk reorders scopes and adds implicit ones.
 			o["scopes"] = o.str("scopes") + " offline_access"
@@ -156,8 +156,14 @@ func TestOauthApplication_Lifecycle(t *testing.T) {
 	d, err = s.Diff(pgp.DiffRequest{ID: created.ID, Urn: urn, State: imp.Properties, Inputs: imp.Inputs, OldInputs: imp.Inputs})
 	require.NoError(t, err)
 	requireNoChanges(t, d)
-	// The live consent screen is on (not Clerk's default of off), so it is adopted (#1801).
-	require.Equal(t, true, imp.Inputs.Get("consentScreenEnabled").AsBool(), "import must adopt a non-default consentScreenEnabled (#1801)")
+	// The live consent screen is on, which is Clerk's default (true), so it is not adopted (#1890).
+	_, adoptedConsent := imp.Inputs.GetOk("consentScreenEnabled")
+	require.False(t, adoptedConsent, "import must not adopt the default consentScreenEnabled (#1890)")
+	// A program that writes the default explicitly plans no change after import.
+	explicit := with(imp.Inputs, map[string]property.Value{"consentScreenEnabled": boolean(true)})
+	d, err = s.Diff(pgp.DiffRequest{ID: created.ID, Urn: urn, State: imp.Properties, Inputs: explicit, OldInputs: imp.Inputs})
+	require.NoError(t, err)
+	requireNoChanges(t, d)
 	// Reordered or partial scopes are not a change (Clerk reorders and adds
 	// implicit ones); a scope Clerk does not have is.
 	for _, scopes := range []string{"offline_access profile", "profile"} {

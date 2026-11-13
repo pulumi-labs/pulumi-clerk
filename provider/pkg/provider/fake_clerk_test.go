@@ -16,6 +16,7 @@ package provider
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -93,6 +94,14 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(v)
 }
+
+// fakeCodedError is a hook error that carries its own Clerk error code.
+type fakeCodedError struct{ code, msg string }
+
+func (e *fakeCodedError) Error() string { return e.msg }
+
+// errDeprecatedParam is what Clerk answers when a deprecated parameter is sent.
+var errDeprecatedParam error = &fakeCodedError{code: "form_param_deprecated", msg: "public_metadata is deprecated and is no longer a valid parameter for this request. Use PATCH /v1/organizations/{organization_id}/metadata to merge updates into existing metadata, or PUT /v1/organizations/{organization_id}/metadata to replace a metadata field entirely."}
 
 func writeAPIError(w http.ResponseWriter, status int, code, msg string) {
 	writeJSON(w, status, map[string]any{"errors": []map[string]any{{"code": code, "message": msg, "long_message": msg}}})
@@ -231,7 +240,12 @@ func (c *fakeCollection) update(w http.ResponseWriter, r *http.Request) {
 	o["updated_at"] = time.Now().UnixMilli()
 	if c.OnUpdate != nil {
 		if err := c.OnUpdate(o, body); err != nil {
-			writeAPIError(w, http.StatusUnprocessableEntity, "form_param_invalid", err.Error())
+			code := "form_param_invalid"
+			var coded *fakeCodedError
+			if errors.As(err, &coded) {
+				code = coded.code
+			}
+			writeAPIError(w, http.StatusUnprocessableEntity, code, err.Error())
 			return
 		}
 	}

@@ -160,13 +160,31 @@ func organizationBody(in OrganizationArgs, create bool) map[string]any {
 	if !create && in.AdminDeleteEnabled != nil {
 		b["admin_delete_enabled"] = *in.AdminDeleteEnabled
 	}
-	if in.PublicMetadata != nil {
+	// Clerk rejects metadata on PATCH /organizations/{id} (422
+	// form_param_deprecated, API version 2026-05-12): an update sends it to
+	// /organizations/{id}/metadata instead (see organizationMetadataUpdates).
+	if create && in.PublicMetadata != nil {
 		b["public_metadata"] = rawJSON(*in.PublicMetadata)
 	}
-	if in.PrivateMetadata != nil {
+	if create && in.PrivateMetadata != nil {
 		b["private_metadata"] = rawJSON(*in.PrivateMetadata)
 	}
 	return b
+}
+
+// organizationMetadataUpdates returns one PUT body per metadata field whose
+// declared value differs from the stored one (compared as JSON). PUT replaces
+// the field entirely, so a key removed from the program disappears in Clerk
+// (PATCH would deep-merge and keep it). Unchanged and unset fields are not sent.
+func organizationMetadataUpdates(in OrganizationArgs, old OrganizationState) []map[string]any {
+	var out []map[string]any
+	if in.PublicMetadata != nil && canonJSON(*in.PublicMetadata) != canonOrEmpty(old.PublicMetadata) {
+		out = append(out, map[string]any{"public_metadata": rawJSON(*in.PublicMetadata)})
+	}
+	if in.PrivateMetadata != nil && canonJSON(*in.PrivateMetadata) != canonOrEmpty(old.PrivateMetadata) {
+		out = append(out, map[string]any{"private_metadata": rawJSON(*in.PrivateMetadata)})
+	}
+	return out
 }
 
 // organizationPreview is the predicted state of an update.
@@ -276,6 +294,11 @@ func (r *Organization) Update(ctx context.Context, req infer.UpdateRequest[Organ
 	var out organizationJSON
 	if err := c.do(ctx, http.MethodPatch, "/organizations/"+esc(req.ID), organizationBody(req.Inputs, false), &out); err != nil {
 		return infer.UpdateResponse[OrganizationState]{}, fmt.Errorf("clerk: update organization %q: %w", req.ID, err)
+	}
+	for _, mb := range organizationMetadataUpdates(req.Inputs, req.State) {
+		if err := c.do(ctx, http.MethodPut, "/organizations/"+esc(req.ID)+"/metadata", mb, &out); err != nil {
+			return infer.UpdateResponse[OrganizationState]{}, fmt.Errorf("clerk: update metadata of organization %q: %w", req.ID, err)
+		}
 	}
 	return infer.UpdateResponse[OrganizationState]{Output: out.state(req.Inputs)}, nil
 }

@@ -6,6 +6,6 @@
   "provider": "clerk",
   "skill_commit": "17da976cca658dfab4425a727e49859c44e2bdc1",
   "source_repo": "pulumi/autoregistry",
-  "source_sha": "829a52be0fe0db54a0f01c32f1a76e33b46725fd",
-  "source_version": "0.1.3"
+  "source_sha": "495c38f4f1f7c283adfa1dfd2fc225620faf86e9",
+  "source_version": "0.1.4"
 }

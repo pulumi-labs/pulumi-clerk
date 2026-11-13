@@ -87,12 +87,12 @@ func TestImport_AdoptsOnlyNonDefaultOptionals(t *testing.T) {
 		_, adopted := imp.Inputs.GetOk("consentScreenEnabled")
 		require.False(t, adopted, "a default consentScreenEnabled must not be adopted (#1563)")
 
-		in := oauthInputs().Set("consentScreenEnabled", boolean(true))
+		in := oauthInputs().Set("consentScreenEnabled", boolean(false))
 		on, err := s.Create(pgp.CreateRequest{Urn: urn, Properties: in})
 		require.NoError(t, err)
 		imp, err = s.Read(pgp.ReadRequest{ID: on.ID, Urn: urn})
 		require.NoError(t, err)
-		require.Equal(t, true, imp.Inputs.Get("consentScreenEnabled").AsBool())
+		require.Equal(t, false, imp.Inputs.Get("consentScreenEnabled").AsBool(), "a non-default consentScreenEnabled is adopted (#1801)")
 	})
 	t.Run("application settings", func(t *testing.T) {
 		f := startFakeClerk(t)
