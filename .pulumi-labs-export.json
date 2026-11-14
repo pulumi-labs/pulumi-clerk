@@ -4,8 +4,8 @@
   "display_name": "Clerk",
   "exclude_platforms": [],
   "provider": "clerk",
-  "skill_commit": "313e2f3fe5b0b958c02919e9841e55cefa72a086",
+  "skill_commit": "b09931120ec7d905283082338584ca5e52b674bf",
   "source_repo": "pulumi/autoregistry",
-  "source_sha": "5b334827b29cad551a67f5669fbc3fbcf999418a",
-  "source_version": "0.1.5"
+  "source_sha": "c68dcc6e98612c577a61ffe5aae9e5e773af0877",
+  "source_version": "0.1.6"
 }

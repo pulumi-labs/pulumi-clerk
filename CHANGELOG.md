@@ -4,6 +4,12 @@ All notable changes to the Clerk Pulumi provider are documented here.
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-11-14
+
+### Security
+
+- Security: the Go SDK `go.mod` in the mirror now requires OpenTelemetry `sdk/log` v1.47.0 instead of v0.21.0, fixing GHSA-q7gw-24fr-5p69 (vulnerable >= 0.9.0, < 1.47.0) and clearing the pulumi-labs/pulumi-clerk Dependabot alert once released (fixes #1972). SDK generation change only. Not breaking.
+
 ## [0.1.5] - 2026-11-13
 
 ### Security
