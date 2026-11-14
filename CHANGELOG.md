@@ -4,6 +4,16 @@ All notable changes to the Clerk Pulumi provider are documented here.
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-11-13
+
+### Security
+
+- Security: updated OpenTelemetry (`go.opentelemetry.io/otel`, `sdk`, `trace`, `metric`, `log` and the OTLP trace exporters) from 1.45.0 to 1.47.0, which fixes GHSA-q7gw-24fr-5p69 (CVE-2026-128085, `AttributeValueLengthLimit` bypass in opentelemetry-go, vulnerable 1.33.0 to 1.46.x). Clears the pulumi-labs/pulumi-clerk Dependabot alerts for it once released (part of #1966). Not breaking.
+
+### Fixed
+
+- `pulumi destroy`, refresh and updates of an imported resource now use credentials and endpoints given only through environment variables (#1955, same root cause as #1951): after `pulumi import` the engine reconfigures the provider without running the config defaults (upstream pulumi/pulumi-go-provider#527), so the environment fallbacks were skipped; the provider config now fills unset settings from the environment in `Configure`. Not breaking.
+
 ## [0.1.4] - 2026-11-13
 
 ### Fixed

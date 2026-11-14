@@ -115,7 +115,7 @@ func newProvider() (pgp.Provider, error) {
 		WithModuleMap(map[tokens.ModuleName]tokens.ModuleName{
 			"provider": "index",
 		}).
-		WithConfig(infer.Config(ProviderConfig{})).
+		WithConfig(infer.Config(&ProviderConfig{})).
 		WithResources(
 			infer.Resource[*BlocklistIdentifier, BlocklistIdentifierArgs, BlocklistIdentifierState](&BlocklistIdentifier{}),
 			infer.Resource[*AllowlistIdentifier, AllowlistIdentifierArgs, AllowlistIdentifierState](&AllowlistIdentifier{}),
