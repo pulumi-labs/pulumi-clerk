@@ -4,6 +4,12 @@ All notable changes to the Clerk Pulumi provider are documented here.
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-11-15
+
+### Security
+
+- Security: updated `golang.org/x/crypto` to v0.59.0 (and its `golang.org/x` companions), clearing GO-2026-5932 (the unmaintained `x/crypto/openpgp` package) for scanners; the provider does not import `openpgp`. Not breaking.
+
 ### Fixed
 
 - After `pulumi import`, a program that declares an optional input equal to Clerk's default no longer plans an in-place update on the first preview: `ApplicationSettings` (`maxAllowedMemberships` 5, `adminDeleteEnabled` true, `domainsEnabled` false), `JwtTemplate` (`lifetime` 60, `allowedClockSkew` 5, `signingAlgorithm` RS256, `customSigningKey` false) and `Machine` (`defaultTokenTtl` 3600) now treat an unset input and Clerk's default as the same value, as `OauthApplication` already did. A different value still updates, and a program that omits the value still plans no change (#1563). The import-adoption change in 0.1.2 left these resources on the plain string diff, which the v0.1.3 and v0.1.4 QA passes did not exercise. Mirror issue https://github.com/pulumi-labs/pulumi-clerk/issues/17 (fixes #2012). Not breaking.
