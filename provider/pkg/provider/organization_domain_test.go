@@ -28,6 +28,9 @@ import (
 type fakeDomains struct {
 	f    *fakeClerk
 	orgs map[string][]fakeObj
+	// gate mirrors Clerk: with the Domains feature off (domains_enabled=false
+	// in the organization settings) the list endpoint returns nothing (#2040).
+	gate bool
 }
 
 func (d *fakeDomains) dropDomain(orgID, id string) {
@@ -90,6 +93,9 @@ func init() {
 				notFound(w, "organization")
 				return
 			}
+			if en, _ := orgSettings(f)["domains_enabled"].(bool); d.gate && !en {
+				items = nil
+			}
 			if items == nil {
 				items = []fakeObj{}
 			}
@@ -135,6 +141,8 @@ func TestOrganizationDomain_Lifecycle(t *testing.T) {
 	s := serverFor(t, f)
 	fd := f.state["domains"].(*fakeDomains)
 	urn := clerkUrn("OrganizationDomain", "d")
+	// An empty list only means "deleted" while Domains are enabled (#2040).
+	orgSettings(f)["domains_enabled"] = true
 
 	inputs := pm(map[string]property.Value{"organizationId": str("org_1"), "name": str("example.com")})
 	created, err := s.Create(pgp.CreateRequest{Urn: urn, Properties: inputs})
@@ -235,4 +243,46 @@ func TestOrganizationDomain_DeleteAndDryRun(t *testing.T) {
 	require.Equal(t, "verified", getStr(t, created.Properties, "verificationStatus"))
 	require.NoError(t, s.Delete(pgp.DeleteRequest{ID: created.ID, Urn: urn, Properties: created.Properties}))
 	require.Empty(t, f.state["domains"].(*fakeDomains).orgs["org_1"])
+}
+
+// #2040: with domainsEnabled=false Clerk lists no domains, which must not look
+// like a deletion on refresh.
+func TestOrganizationDomain_DomainsDisabled(t *testing.T) {
+	f := startFakeClerk(t)
+	s := serverFor(t, f)
+	fd := f.state["domains"].(*fakeDomains)
+	urn := clerkUrn("OrganizationDomain", "d")
+	in := pm(map[string]property.Value{"organizationId": str("org_1"), "name": str("example.com")})
+
+	orgSettings(f)["domains_enabled"] = true
+	created, err := s.Create(pgp.CreateRequest{Urn: urn, Properties: in})
+	require.NoError(t, err)
+	fd.gate = true
+
+	// Enabled and present: normal read.
+	read, err := s.Read(pgp.ReadRequest{ID: created.ID, Urn: urn, Properties: created.Properties, Inputs: in})
+	require.NoError(t, err)
+	require.Equal(t, created.ID, read.ID)
+
+	// Disabled: the list is empty, refresh keeps the state.
+	orgSettings(f)["domains_enabled"] = false
+	read, err = s.Read(pgp.ReadRequest{ID: created.ID, Urn: urn, Properties: created.Properties, Inputs: in})
+	require.NoError(t, err)
+	require.Equal(t, created.ID, read.ID)
+	require.Equal(t, "example.com", getStr(t, read.Properties, "name"))
+	require.Equal(t, getStr(t, created.Properties, "enrollmentMode"), getStr(t, read.Properties, "enrollmentMode"))
+
+	// Disabled: import and lookup explain the cause.
+	_, err = s.Read(pgp.ReadRequest{ID: created.ID, Urn: urn})
+	require.ErrorContains(t, err, "domainsEnabled")
+	_, err = invoke(t, s, "getOrganizationDomain", map[string]property.Value{"organizationId": str("org_1"), "name": str("example.com")})
+	require.ErrorContains(t, err, "domainsEnabled")
+
+	// Enabled again and the domain truly deleted: still reported gone.
+	orgSettings(f)["domains_enabled"] = true
+	_, domID, _ := splitID("d", "o", created.ID)
+	fd.dropDomain("org_1", domID)
+	gone, err := s.Read(pgp.ReadRequest{ID: created.ID, Urn: urn, Properties: created.Properties, Inputs: in})
+	require.NoError(t, err)
+	require.Empty(t, gone.ID)
 }

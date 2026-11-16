@@ -16,6 +16,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -52,7 +53,7 @@ type OrganizationDomainState struct {
 }
 
 func (r *OrganizationDomain) Annotate(a infer.Annotator) {
-	a.Describe(&r, "A domain attached to a Clerk organization. The resource ID is <organizationId>/<domainId>; import with that composite ID (for example org_123/orgdmn_456). The organization and the name cannot be changed: changing either replaces the domain.")
+	a.Describe(&r, "A domain attached to a Clerk organization. The resource ID is <organizationId>/<domainId>; import with that composite ID (for example org_123/orgdmn_456). The organization and the name cannot be changed: changing either replaces the domain. Clerk lists no domains while the instance has domainsEnabled=false: refresh then keeps the last known state (instead of reporting the domain deleted) and import fails with an explanation.")
 }
 
 func (a *OrganizationDomainArgs) Annotate(ann infer.Annotator) {
@@ -185,6 +186,25 @@ func findOrganizationDomain(ctx context.Context, c *client, orgID, id string) (*
 	return nil, nil
 }
 
+// organizationDomainsDisabled reports whether the instance has the Domains
+// feature off (domainsEnabled=false). Clerk then lists no domains for any
+// organization, which is indistinguishable from a deleted domain (#2040). There
+// is no GET for the settings, so an empty PATCH (which changes nothing) reads
+// them; when the API refuses it the answer is "unknown" and reported as false.
+func organizationDomainsDisabled(ctx context.Context, c *client) (bool, error) {
+	got, err := patchApplicationSettings(ctx, c, map[string]any{})
+	if err != nil {
+		var ae *apiError
+		if errors.As(err, &ae) && (ae.Status == http.StatusBadRequest || ae.Status == http.StatusUnprocessableEntity) {
+			return false, nil
+		}
+		return false, err
+	}
+	return !got.DomainsEnabled, nil
+}
+
+const domainsDisabledHint = "the instance has domainsEnabled=false, so Clerk lists no organization domains; enable it (ApplicationSettings domainsEnabled) to read this domain"
+
 func (r *OrganizationDomain) Read(ctx context.Context, req infer.ReadRequest[OrganizationDomainArgs, OrganizationDomainState]) (infer.ReadResponse[OrganizationDomainArgs, OrganizationDomainState], error) {
 	empty := infer.ReadResponse[OrganizationDomainArgs, OrganizationDomainState]{}
 	orgID, id, err := splitID("organization domain", "organizationId", req.ID)
@@ -200,6 +220,18 @@ func (r *OrganizationDomain) Read(ctx context.Context, req infer.ReadRequest[Org
 		return empty, fmt.Errorf("clerk: read organization domain %q: %w", req.ID, err)
 	}
 	if got == nil {
+		// An empty list is only a deletion when Domains are enabled (#2040).
+		disabled, err := organizationDomainsDisabled(ctx, c)
+		if err != nil {
+			return empty, fmt.Errorf("clerk: read organization domain %q: %w", req.ID, err)
+		}
+		if disabled {
+			if req.Inputs.Name == "" && req.State.Name == "" {
+				return empty, fmt.Errorf("clerk: cannot import organization domain %q: %s", req.ID, domainsDisabledHint)
+			}
+			// Keep the last known state instead of dropping the domain.
+			return infer.ReadResponse[OrganizationDomainArgs, OrganizationDomainState]{ID: req.ID, Inputs: req.Inputs, State: req.State}, nil
+		}
 		if err := notFoundOnImport("organization domain", req.ID, req.Inputs, req.State); err != nil {
 			return empty, err
 		}
@@ -325,6 +357,9 @@ func (f *GetOrganizationDomain) Invoke(ctx context.Context, req infer.FunctionRe
 			}
 			return out, nil
 		}
+	}
+	if disabled, derr := organizationDomainsDisabled(ctx, c); derr == nil && disabled {
+		return out, fmt.Errorf("clerk: getOrganizationDomain: organization domain %q was not found: %s", id+name, domainsDisabledHint)
 	}
 	return out, lookupErr("organization domain", fmt.Sprintf("%q", id+name), &apiError{Status: http.StatusNotFound})
 }

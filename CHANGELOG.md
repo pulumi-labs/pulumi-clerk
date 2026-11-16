@@ -4,6 +4,12 @@ All notable changes to the Clerk Pulumi provider are documented here.
 
 ## [Unreleased]
 
+## [0.1.8] - 2026-11-16
+
+### Fixed
+
+- Fixed `OrganizationDomain` refresh dropping the domain from state while the instance has `domainsEnabled=false`: Clerk then lists no organization domains, which Read took for a deletion (pulumi-labs/pulumi-clerk#27, fixes #2040). Read now checks the instance settings when the list lacks the domain: with domains disabled it keeps the last known state, `pulumi import` fails with an explanation naming `domainsEnabled`, and `getOrganizationDomain` adds the same hint to its not-found error. With domains enabled a missing domain is still reported deleted. Not breaking.
+
 ## [0.1.7] - 2026-11-15
 
 ### Security

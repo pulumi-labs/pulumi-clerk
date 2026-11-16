@@ -152,6 +152,7 @@ regressions:
   - "#1183 templates use the default provider and declare clerk:apiKey in template config, so a template program runs without an explicit provider"
   - "#1183 OauthApplication takes callbackUrl (a single URL) in the team-auth example"
   - "#1413 the native provider keeps the clerk:index:<Resource> tokens and the clerk:apiKey and clerk:platformApiKey config keys, and CLERK_API_KEY falls back to CLERK_SECRET_KEY"
+  - "#2040 (pulumi-labs/pulumi-clerk#27) with ApplicationSettings domainsEnabled=false, `pulumi refresh --expect-no-changes` on an existing OrganizationDomain keeps it in state (Clerk lists no domains then); import fails naming domainsEnabled. Verified with the fake only (live behaviour per the mirror report)"
   - "#1413 OrganizationDomain IDs are <organizationId>/<id> and import by that composite ID works"
   - "#1413 ApiKey.name and ApiKey.createdBy force replacement while description updates in place"
   - "#1413 an unset optional input is not overwritten by a Clerk default; the default shows in the effective* or current* output and a second pulumi up shows no diff"

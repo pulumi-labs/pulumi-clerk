@@ -99,7 +99,7 @@ class OrganizationDomain(pulumi.CustomResource):
                  verified: Optional[pulumi.Input[_builtins.bool]] = None,
                  __props__=None):
         """
-        A domain attached to a Clerk organization. The resource ID is <organizationId>/<domainId>; import with that composite ID (for example org_123/orgdmn_456). The organization and the name cannot be changed: changing either replaces the domain.
+        A domain attached to a Clerk organization. The resource ID is <organizationId>/<domainId>; import with that composite ID (for example org_123/orgdmn_456). The organization and the name cannot be changed: changing either replaces the domain. Clerk lists no domains while the instance has domainsEnabled=false: refresh then keeps the last known state (instead of reporting the domain deleted) and import fails with an explanation.
 
 
         :param str resource_name: The name of the resource.
@@ -116,7 +116,7 @@ class OrganizationDomain(pulumi.CustomResource):
                  args: OrganizationDomainArgs,
                  opts: Optional[pulumi.ResourceOptions] = None):
         """
-        A domain attached to a Clerk organization. The resource ID is <organizationId>/<domainId>; import with that composite ID (for example org_123/orgdmn_456). The organization and the name cannot be changed: changing either replaces the domain.
+        A domain attached to a Clerk organization. The resource ID is <organizationId>/<domainId>; import with that composite ID (for example org_123/orgdmn_456). The organization and the name cannot be changed: changing either replaces the domain. Clerk lists no domains while the instance has domainsEnabled=false: refresh then keeps the last known state (instead of reporting the domain deleted) and import fails with an explanation.
 
 
         :param str resource_name: The name of the resource.
